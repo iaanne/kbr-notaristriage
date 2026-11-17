@@ -6,1256 +6,679 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix swrl: <http://www.w3.org/2003/11/swrl#> .
 @prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .
+@prefix lkif-la: <http://www.estrellaproject.org/lkif-core/legal-action.owl#> .
+@prefix lkif-action: <http://www.estrellaproject.org/lkif-core/action.owl#> .
+@prefix lkif-process: <http://www.estrellaproject.org/lkif-core/process.owl#> .
+@prefix lkif-lr: <http://www.estrellaproject.org/lkif-core/legal-role.owl#> .
+@prefix lkif-expr: <http://www.estrellaproject.org/lkif-core/expression.owl#> .
 @base <http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#> .
 
 <http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage> rdf:type owl:Ontology ;
-                                       owl:imports <http://www.w3.org/2002/07/owl> ;
-                                       rdfs:comment "Parafrase orisinal dari ide B-Team 3. TASK SPESIFIK (dikunci): Triase Tuntas. input cerita bahasa sehari-hari, output wajib 5 (instansi + versi akta + ceklis dokumen kurang/sudah + status + langkah berikutnya), chatbot dilarang tutup sebelum slot lengkap. SKEMA GANTI TOTAL: tidak memakai skema knowledge-graph regulasi maupun portal-layanan-publik existing; kelas inti orisinal: CeritaAwam, KasusTriage, JenisTransaksi, StatusPenanganan, saranLangkah, butuhAkta, ditanganiOleh. Layer: core generik + hukum Indonesia (UUJN/PPAT/KUHPerdata) + domain Notaris/PPAT + inferensi SWRL."@id ;
-                                       rdfs:label "Notaris Triage Ontologi pendamping awam untuk layanan Notaris/PPAT"@id ;
-                                       owl:versionInfo "0.2.0 task Triase Tuntas + skema ganti total, desk research, OWL DL" .
+    owl:imports <http://www.estrellaproject.org/lkif-core/lkif-top.owl> ,
+        <http://www.estrellaproject.org/lkif-core/mereology.owl> ,
+        <http://www.estrellaproject.org/lkif-core/relative-places.owl> ,
+        <http://www.estrellaproject.org/lkif-core/process.owl> ,
+        <http://www.estrellaproject.org/lkif-core/time.owl> ,
+        <http://www.estrellaproject.org/lkif-core/action.owl> ,
+        <http://www.estrellaproject.org/lkif-core/role.owl> ,
+        <http://www.estrellaproject.org/lkif-core/expression.owl> ,
+        <http://www.estrellaproject.org/lkif-core/legal-action.owl> ,
+        <http://www.estrellaproject.org/lkif-core/legal-role.owl> ;
+    rdfs:comment "T-Box triase Notaris/PPAT. Berkas ini memuat skema dan aturan. Seluruh individu aplikasi tetap berada di data/abox.ttl dan dimuat terpisah. Satu pengecualian: :trans_warisJual dideklarasikan di sini karena kelas terdefinisi :KasusWarisJual memakai konstruk nominal owl:hasValue, dan konstruk itu wajib menamai satu individu bernama. Nominal inilah yang menaikkan ekspresivitas ke SROIQ(D) (huruf O); lihat blok Individuals di bawah. Kelas domain merujuk LKIF-Core (CC BY 4.0) sebagai legal core ontology; lihat ontology/external/lkif/. Modul lkif-core.owl sengaja tidak diimpor langsung: ia menarik norm.owl, dan Pellet 2.2.0 di Protege tidak selesai mengklasifikasi norm.owl (StackOverflow di blocking saat precompute). Modul LKIF lain diimpor satu per satu supaya closure tetap bersih."@id ;
+    rdfs:label "Notaris Triage Ontologi pendamping awam untuk layanan Notaris/PPAT"@id ;
+    owl:versionInfo "0.4.0 SROIQ(D): nominal owl:hasValue pada :KasusWarisJual dan rantai properti :dasarKasus" .
 
 #################################################################
 #    Annotation properties
 #################################################################
 
-###  http://www.w3.org/2003/11/swrl#argument1
-swrl:argument1 rdf:type owl:AnnotationProperty .
+###  anotasi domain
+:kataKunci rdf:type owl:AnnotationProperty ;
+    rdfs:comment "Sinonim dan frasa pemicu pada bahasa awam. Dipakai demo untuk mencocokkan cerita ke kasus, sehingga daftar kata tidak lagi ditulis di kode."@id ;
+    rdfs:label "kata kunci"@id .
 
+:prioritas rdf:type owl:AnnotationProperty ;
+    rdfs:comment "Angka pemecah seri saat satu cerita cocok ke beberapa kasus. Angka lebih besar diperiksa lebih dulu."@id ;
+    rdfs:label "prioritas"@id .
 
-###  http://www.w3.org/2003/11/swrl#argument2
-swrl:argument2 rdf:type owl:AnnotationProperty .
-
-
-###  http://www.w3.org/2003/11/swrl#body
-swrl:body rdf:type owl:AnnotationProperty .
-
-
-###  http://www.w3.org/2003/11/swrl#classPredicate
-swrl:classPredicate rdf:type owl:AnnotationProperty .
-
-
-###  http://www.w3.org/2003/11/swrl#head
-swrl:head rdf:type owl:AnnotationProperty .
-
-
-###  http://www.w3.org/2003/11/swrl#propertyPredicate
-swrl:propertyPredicate rdf:type owl:AnnotationProperty .
+:sumber rdf:type owl:AnnotationProperty ;
+    rdfs:comment "Rujukan sumber hukum atau data, misalnya alamat peraturan.go.id."@id ;
+    rdfs:label "sumber"@id .
 
 
 #################################################################
-#    Object Properties
+#    Object properties
 #################################################################
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aktaUntuk
+###  :aktaUntuk
 :aktaUntuk rdf:type owl:ObjectProperty ;
-           owl:inverseOf :butuhAkta ;
-           rdfs:domain :Akta ;
-           rdfs:range :KasusTriage ;
-           rdfs:label "akta untuk"@id .
+    owl:inverseOf :butuhAkta ;
+    rdfs:domain :Akta ;
+    rdfs:range :KasusTriage ;
+    rdfs:label "akta untuk"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#berdasarPada
+###  :berdasarPada
 :berdasarPada rdf:type owl:ObjectProperty ;
-              rdfs:domain :Akta ;
-              rdfs:range :AturanHukum ;
-              rdfs:label "berdasar pada"@id .
+    rdfs:domain :Akta ;
+    rdfs:range :AturanHukum ;
+    rdfs:label "berdasar pada"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#berstatus
+###  :berstatus
 :berstatus rdf:type owl:ObjectProperty ,
-                    owl:FunctionalProperty ;
-           rdfs:domain :KasusTriage ;
-           rdfs:range :StatusPenanganan ;
-           rdfs:comment "Setiap kasus hanya punya satu status aktif."@id ;
-           rdfs:label "berstatus"@id .
+        owl:FunctionalProperty ;
+    rdfs:domain :KasusTriage ;
+    rdfs:range :StatusPenanganan ;
+    rdfs:comment "Mengikuti slide reasoning: domain dan range dipilih sesempit yang benar, bukan owl:Thing. Functional karena satu kasus punya satu status aktif."@id ;
+    rdfs:label "berstatus"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#butuhAkta
+###  :butuhAkta
 :butuhAkta rdf:type owl:ObjectProperty ;
-           rdfs:domain :KasusTriage ;
-           rdfs:range :Akta ;
-           rdfs:label "butuh akta"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range :Akta ;
+    rdfs:label "butuh akta"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#butuhDokumen
+###  :butuhDokumen
 :butuhDokumen rdf:type owl:ObjectProperty ;
-              rdfs:domain :KasusTriage ;
-              rdfs:range :DokumenSyarat ;
-              rdfs:comment "Dokumen yang masih kurang / harus disiapkan."@id ;
-              rdfs:label "butuh dokumen"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range :DokumenSyarat ;
+    rdfs:comment "Dokumen yang masih kurang dan harus disiapkan."@id ;
+    rdfs:label "butuh dokumen"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dasarKasus
+###  :dasarKasus
 :dasarKasus rdf:type owl:ObjectProperty ;
-            rdfs:domain :KasusTriage ;
-            rdfs:range :AturanHukum ;
-            rdfs:label "dasar kasus"@id .
+    owl:propertyChainAxiom ( :butuhAkta :berdasarPada ) ;
+    rdfs:domain :KasusTriage ;
+    rdfs:range :AturanHukum ;
+    rdfs:comment "Rantai properti (huruf R pada SROIQ): bila sebuah kasus butuh akta dan akta itu berdasar pada suatu aturan, maka aturan tersebut menjadi dasar kasus. Contoh: kasus butuh akta_PHB, akta_PHB berdasar aturan_ppat, maka dasarKasus kasus adalah aturan_ppat."@id ;
+    rdfs:label "dasar kasus"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dikenaiBiaya
+###  :dikenaiBiaya
 :dikenaiBiaya rdf:type owl:ObjectProperty ;
-              rdfs:domain :KasusTriage ;
-              rdfs:range :KomponenBiaya ;
-              rdfs:label "dikenai biaya"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range :KomponenBiaya ;
+    rdfs:label "dikenai biaya"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#ditanganiOleh
-:ditanganiOleh rdf:type owl:ObjectProperty ;
-               owl:inverseOf :menangani ;
-               rdfs:domain :KasusTriage ;
-               rdfs:range :Lembaga ;
-               rdfs:comment "Kasus diarahkan ke lembaga mana."@id ;
-               rdfs:label "ditangani oleh"@id .
+###  :ditanganiOleh
+:ditanganiOleh rdf:type owl:ObjectProperty ,
+        owl:FunctionalProperty ;
+    owl:inverseOf :menangani ;
+    rdfs:domain :KasusTriage ;
+    rdfs:range :Lembaga ;
+    rdfs:comment "Satu kasus diarahkan ke satu lembaga. Functional supaya badge instansi di demo tunggal dan tidak rancu."@id ;
+    rdfs:label "ditangani oleh"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#melibatkanTokoh
+###  :melibatkanTokoh
 :melibatkanTokoh rdf:type owl:ObjectProperty ;
-                 rdfs:domain :KasusTriage ;
-                 rdfs:range :Tokoh ;
-                 rdfs:label "melibatkan tokoh"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range :Tokoh ;
+    rdfs:label "melibatkan tokoh"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#menangani
+###  :menangani
 :menangani rdf:type owl:ObjectProperty ;
-           rdfs:domain :Lembaga ;
-           rdfs:range :KasusTriage ;
-           rdfs:label "menangani"@id .
+    rdfs:domain :Lembaga ;
+    rdfs:range :KasusTriage ;
+    rdfs:label "menangani"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#menceritakan
-:menceritakan rdf:type owl:ObjectProperty ;
-              rdfs:domain :CeritaAwam ;
-              rdfs:range :KasusTriage ;
-              rdfs:label "menceritakan"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#perluDaftarDi
+###  :perluDaftarDi
 :perluDaftarDi rdf:type owl:ObjectProperty ;
-               rdfs:domain :Akta ;
-               rdfs:range :Lembaga ;
-               rdfs:label "perlu daftar di"@id .
+    rdfs:domain :Akta ;
+    rdfs:range :Lembaga ;
+    rdfs:label "perlu daftar di"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#punyaJenis
+###  :punyaJenis
 :punyaJenis rdf:type owl:ObjectProperty ;
-            rdfs:domain :KasusTriage ;
-            rdfs:range :JenisTransaksi ;
-            rdfs:label "punya jenis keperluan"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range :JenisTransaksi ;
+    rdfs:label "punya jenis keperluan"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#punyaObjek
+###  :punyaObjek
 :punyaObjek rdf:type owl:ObjectProperty ;
-            rdfs:domain :KasusTriage ;
-            rdfs:range :ObjekHukum ;
-            rdfs:label "punya objek"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range :ObjekHukum ;
+    rdfs:label "punya objek"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#sudahPunyaDokumen
+###  :sudahPunyaDokumen
 :sudahPunyaDokumen rdf:type owl:ObjectProperty ;
-                   rdfs:domain :KasusTriage ;
-                   rdfs:range :DokumenSyarat ;
-                   rdfs:label "sudah punya dokumen"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range :DokumenSyarat ;
+    rdfs:label "sudah punya dokumen"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#terkaitAturan
+###  :terkaitAturan
 :terkaitAturan rdf:type owl:ObjectProperty ,
-                        owl:TransitiveProperty ;
-               rdfs:domain :AturanHukum ;
-               rdfs:range :AturanHukum ;
-               rdfs:comment "Contoh transitive: jika A terkait B dan B terkait C maka A terkait C."@id ;
-               rdfs:label "terkait aturan"@id .
+        owl:TransitiveProperty ;
+    rdfs:domain :AturanHukum ;
+    rdfs:range :AturanHukum ;
+    rdfs:comment "Contoh transitive: bila A terkait B dan B terkait C, maka A terkait C."@id ;
+    rdfs:label "terkait aturan"@id .
 
 
 #################################################################
 #    Data properties
 #################################################################
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#adaSKWaris
+###  :adaSKWaris
 :adaSKWaris rdf:type owl:DatatypeProperty ;
-            rdfs:domain :KasusTriage ;
-            rdfs:range xsd:boolean ;
-            rdfs:label "ada surat waris"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "ada surat waris"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#adaSepakat
+###  :adaSepakat
 :adaSepakat rdf:type owl:DatatypeProperty ;
-            rdfs:domain :KasusTriage ;
-            rdfs:range xsd:boolean ;
-            rdfs:label "ada kesepakatan semua pihak"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "ada kesepakatan semua pihak"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#adaSertifikat
+###  :adaSertifikat
 :adaSertifikat rdf:type owl:DatatypeProperty ;
-               rdfs:domain :KasusTriage ;
-               rdfs:range xsd:boolean ;
-               rdfs:label "ada sertifikat"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "ada sertifikat"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#cakapHukum
+###  :cakapHukum
 :cakapHukum rdf:type owl:DatatypeProperty ;
-            rdfs:domain :KasusTriage ;
-            rdfs:range xsd:boolean ;
-            rdfs:label "cakap hukum"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "cakap hukum"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#jumlahPendiri
-:jumlahPendiri rdf:type owl:DatatypeProperty ;
-               rdfs:domain :KasusTriage ;
-               rdfs:range xsd:integer ;
-               rdfs:label "jumlah pendiri"@id .
+###  :jumlahPendiri
+:jumlahPendiri rdf:type owl:DatatypeProperty ,
+        owl:FunctionalProperty ;
+    rdfs:domain :KasusTriage ;
+    rdfs:range xsd:integer ;
+    rdfs:label "jumlah pendiri"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#modalKecil
+###  :modalKecil
 :modalKecil rdf:type owl:DatatypeProperty ;
-            rdfs:domain :KasusTriage ;
-            rdfs:range xsd:boolean ;
-            rdfs:label "modal kecil (usaha mikro)"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "modal kecil (usaha mikro)"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#penjelasanAwam
+###  :penjelasanAwam
 :penjelasanAwam rdf:type owl:DatatypeProperty ;
-                rdfs:domain [ rdf:type owl:Class ;
-                              owl:unionOf ( :Akta
-                                            :AturanHukum
-                                            :JenisTransaksi
-                                            :KomponenBiaya
-                                            :Lembaga
-                                            :ObjekHukum
-                                            :StatusPenanganan
-                                          )
-                            ] ;
-                rdfs:range xsd:string ;
-                rdfs:comment "Domain dibatasi union 7 kelas yang memang punya penjelasan awam — tidak seumum owl:Thing, tidak sesempit satu kelas."@id ;
-                rdfs:label "penjelasan awam"@id .
+    rdfs:domain [ rdf:type owl:Class ;
+                  owl:unionOf ( :Akta
+                                :AturanHukum
+                                :JenisTransaksi
+                                :KomponenBiaya
+                                :Lembaga
+                                :ObjekHukum
+                                :StatusPenanganan
+                              )
+                ] ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Domain dibatasi union tujuh kelas yang memang punya penjelasan awam: tidak seumum owl:Thing, tidak sesempit satu kelas."@id ;
+    rdfs:label "penjelasan awam"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#perkiraanBiaya
+###  :perkiraanBiaya
 :perkiraanBiaya rdf:type owl:DatatypeProperty ;
-                rdfs:domain :KasusTriage ;
-                rdfs:range xsd:string ;
-                rdfs:label "perkiraan biaya"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range xsd:string ;
+    rdfs:label "perkiraan biaya"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#perkiraanWaktu
+###  :perkiraanWaktu
 :perkiraanWaktu rdf:type owl:DatatypeProperty ;
-                rdfs:domain :KasusTriage ;
-                rdfs:range xsd:string ;
-                rdfs:label "perkiraan waktu"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range xsd:string ;
+    rdfs:label "perkiraan waktu"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#saranLangkah
+###  :saranLangkah
 :saranLangkah rdf:type owl:DatatypeProperty ;
-              rdfs:domain :KasusTriage ;
-              rdfs:range xsd:string ;
-              rdfs:label "saran langkah"@id .
+    rdfs:domain :KasusTriage ;
+    rdfs:range xsd:string ;
+    rdfs:label "saran langkah"@id .
 
 
 #################################################################
 #    Classes
 #################################################################
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AhliWaris
+###  :AhliWaris
 :AhliWaris rdf:type owl:Class ;
-           rdfs:subClassOf :Tokoh ;
-           rdfs:label "Ahli waris"@id .
+    rdfs:subClassOf :Tokoh ;
+    rdfs:label "Ahli waris"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#Akta
+###  :Akta
 :Akta rdf:type owl:Class ;
-      rdfs:comment "Produk hukum: akta jual beli, hibah, fidusia, wasiat, pendirian usaha, dsb."@id ;
-      rdfs:label "Akta dan surat"@id .
+    rdfs:subClassOf lkif-expr:Document ;
+    rdfs:comment "Produk hukum: akta jual beli, hibah, fidusia, wasiat, pendirian usaha, dan sejenisnya. Dipetakan ke LKIF expression:Document karena akta adalah dokumen tertulis. Kelas norm:Legal_Document tidak dipakai karena modul norm.owl tidak diimpor (lihat catatan owl:imports)."@id ;
+    rdfs:label "Akta dan surat"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaBagiWaris
+###  :AktaBagiWaris
 :AktaBagiWaris rdf:type owl:Class ;
-               rdfs:subClassOf :Akta ;
-               rdfs:label "Akta pembagian hak bersama (APHB)"@id .
+    rdfs:subClassOf :Akta ;
+    rdfs:label "Akta pembagian hak bersama (APHB)"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaCV
+###  :AktaCV
 :AktaCV rdf:type owl:Class ;
-        rdfs:subClassOf :AktaUsaha ;
-        rdfs:label "Akta pendirian CV"@id .
+    rdfs:subClassOf :AktaUsaha ;
+    rdfs:label "Akta pendirian CV"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaFidusia
+###  :AktaFidusia
 :AktaFidusia rdf:type owl:Class ;
-             rdfs:subClassOf :AktaJaminan ;
-             rdfs:label "Akta fidusia"@id .
+    rdfs:subClassOf :AktaJaminan ;
+    rdfs:label "Akta fidusia"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaHibahTanah
+###  :AktaHibahTanah
 :AktaHibahTanah rdf:type owl:Class ;
-                rdfs:subClassOf :Akta ;
-                rdfs:label "Akta hibah tanah"@id .
+    rdfs:subClassOf :Akta ;
+    rdfs:label "Akta hibah tanah"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaJaminan
+###  :AktaJaminan
 :AktaJaminan rdf:type owl:Class ;
-             rdfs:subClassOf :Akta ;
-             rdfs:label "Akta jaminan utang"@id .
+    rdfs:subClassOf :Akta ;
+    rdfs:label "Akta jaminan utang"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaJualBeli
+###  :AktaJualBeli
 :AktaJualBeli rdf:type owl:Class ;
-              rdfs:subClassOf :Akta ;
-              rdfs:label "Akta jual beli (AJB)"@id .
+    rdfs:subClassOf :Akta ;
+    rdfs:label "Akta jual beli (AJB)"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaPTBiasa
+###  :AktaPTBiasa
 :AktaPTBiasa rdf:type owl:Class ;
-             rdfs:subClassOf :AktaUsaha ;
-             rdfs:label "Akta pendirian PT biasa"@id .
+    rdfs:subClassOf :AktaUsaha ;
+    rdfs:label "Akta pendirian PT biasa"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaPTPerorangan
+###  :AktaPTPerorangan
 :AktaPTPerorangan rdf:type owl:Class ;
-                  rdfs:subClassOf :AktaUsaha ;
-                  rdfs:label "Pernyataan PT perorangan"@id .
+    rdfs:subClassOf :AktaUsaha ;
+    rdfs:label "Pernyataan PT perorangan"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaPerjanjianKawin
+###  :AktaPerjanjianKawin
 :AktaPerjanjianKawin rdf:type owl:Class ;
-                     rdfs:subClassOf :Akta ;
-                     rdfs:label "Akta perjanjian kawin"@id .
+    rdfs:subClassOf :Akta ;
+    rdfs:label "Akta perjanjian kawin"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaHakTanggungan
+###  :AktaHakTanggungan
 :AktaHakTanggungan rdf:type owl:Class ;
-                   rdfs:subClassOf :AktaJaminan ;
-                   rdfs:comment "Akta POKOK pembebanan Hak Tanggungan atas tanah (UUHT No.4/1996): dibuat di hadapan PPAT dan wajib didaftarkan ke BPN. Berbeda dengan SKMHT yang hanya kuasa pendahulunya."@id ;
-                   rdfs:label "Akta Pemberian Hak Tanggungan (APHT)"@id .
+    rdfs:subClassOf :AktaJaminan ,
+        [ rdf:type owl:Restriction ;
+          owl:onProperty :perluDaftarDi ;
+          owl:someValuesFrom :Lembaga
+        ] ;
+    rdfs:comment "Akta pokok pembebanan Hak Tanggungan atas tanah (UUHT No.4/1996): dibuat di hadapan PPAT dan wajib didaftarkan ke BPN. Berbeda dengan SKMHT yang hanya kuasa pendahulunya. Restriction someValuesFrom menegaskan akta ini selalu terdaftar di suatu lembaga."@id ;
+    rdfs:label "Akta Pemberian Hak Tanggungan (APHT)"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#SuratKuasaMembebankan
+###  :SuratKuasaMembebankan
 :SuratKuasaMembebankan rdf:type owl:Class ;
-                       rdfs:subClassOf :Akta ;
-                       rdfs:comment "SKMHT BUKAN akta jaminan: kuasa otentik untuk memasang APHT, dibuat di hadapan Notaris/PPAT, dan wajib diikuti APHT dalam batas waktu UUHT. SKMHT sendiri tidak didaftarkan ke BPN."@id ;
-                       rdfs:label "SKMHT — kuasa membebankan Hak Tanggungan"@id .
+    rdfs:subClassOf :Akta ,
+        [ rdf:type owl:Restriction ;
+          owl:onProperty :berdasarPada ;
+          owl:someValuesFrom :AturanHukum
+        ] ;
+    rdfs:comment "SKMHT bukan akta jaminan: kuasa otentik untuk memasang APHT, dibuat di hadapan Notaris/PPAT, dan wajib diikuti APHT dalam batas waktu UUHT. SKMHT sendiri tidak didaftarkan ke BPN."@id ;
+    rdfs:label "SKMHT, kuasa membebankan Hak Tanggungan"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaUsaha
+###  :AktaUsaha
 :AktaUsaha rdf:type owl:Class ;
-           rdfs:subClassOf :Akta ;
-           rdfs:label "Akta usaha"@id .
+    rdfs:subClassOf :Akta ;
+    rdfs:label "Akta usaha"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaWasiat
+###  :AktaWasiat
 :AktaWasiat rdf:type owl:Class ;
-            rdfs:subClassOf :Akta ;
-            rdfs:label "Akta wasiat"@id .
+    rdfs:subClassOf :Akta ;
+    rdfs:label "Akta wasiat"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AturanHukum
+###  :AturanHukum
 :AturanHukum rdf:type owl:Class ;
-             rdfs:comment "Dasar hukum: UUJN, aturan PPAT, KUHPerdata, dsb."@id ;
-             rdfs:label "Aturan hukum"@id .
+    rdfs:subClassOf lkif-expr:Document ;
+    rdfs:comment "Dasar hukum: UUJN, aturan PPAT, KUHPerdata, KHI. Dipetakan ke LKIF expression:Document: peraturan adalah dokumen hukum tertulis. Kelas norm:Legal_Source tidak dipakai karena modul norm.owl tidak diimpor (lihat catatan owl:imports)."@id ;
+    rdfs:label "Aturan hukum"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#CeritaAwam
+###  :CeritaAwam
 :CeritaAwam rdf:type owl:Class ;
-            rdfs:comment "Ungkapan masalah dalam bahasa sehari-hari, misalnya 'mau jual tanah warisan'."@id ;
-            rdfs:label "Cerita awam"@id .
+    rdfs:comment "Ungkapan masalah dalam bahasa sehari-hari, misalnya mau jual tanah warisan."@id ;
+    rdfs:label "Cerita awam"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#DokumenSyarat
+###  :DokumenSyarat
 :DokumenSyarat rdf:type owl:Class ;
-               rdfs:comment "Berkas yang harus dibawa: KTP, sertifikat, PBB, dsb."@id ;
-               rdfs:label "Dokumen syarat"@id .
+    rdfs:subClassOf lkif-expr:Document ;
+    rdfs:comment "Berkas yang harus dibawa: KTP, sertifikat, PBB, dan sejenisnya. Dipetakan ke LKIF expression:Document."@id ;
+    rdfs:label "Dokumen syarat"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#JenisTransaksi
+###  :JenisTransaksi
 :JenisTransaksi rdf:type owl:Class ;
-                rdfs:comment "Kategori kebutuhan awam: jual beli, waris, hibah, usaha, utang, wasiat, kawin."@id ;
-                rdfs:label "Jenis keperluan"@id .
+    rdfs:subClassOf lkif-action:Transaction ;
+    rdfs:comment "Kategori kebutuhan awam: jual beli, waris, hibah, usaha, utang, wasiat, kawin. Dipetakan ke LKIF action:Transaction."@id ;
+    rdfs:label "Jenis keperluan"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#KasusTriage
+###  :KasusTriage
 :KasusTriage rdf:type owl:Class ;
-             rdfs:comment "Hasil pemetaan cerita awam menjadi peristiwa hukum yang siap ditangani."@id ;
-             rdfs:label "Kasus triase"@id .
+    rdfs:subClassOf :PeristiwaHukum ,
+        [ rdf:type owl:Restriction ;
+          owl:onProperty :punyaJenis ;
+          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+          owl:onClass :JenisTransaksi
+        ] ;
+    rdfs:comment "Hasil pemetaan cerita awam menjadi peristiwa hukum yang siap ditangani. Setiap kasus tepat satu jenis keperluan, ditegaskan lewat restriction cardinality."@id ;
+    rdfs:label "Kasus triase"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#KomponenBiaya
+###  :KasusWarisJual
+:KasusWarisJual rdf:type owl:Class ;
+    owl:equivalentClass [ rdf:type owl:Class ;
+                          owl:intersectionOf ( :KasusTriage
+                                               [ rdf:type owl:Restriction ;
+                                                 owl:onProperty :punyaJenis ;
+                                                 owl:hasValue :trans_warisJual
+                                               ]
+                                             )
+                        ] ;
+    rdfs:comment "Kelas terdefinisi: kasus triase yang jenisnya persis warisJual. Memakai owl:hasValue (nominal, huruf O pada SROIQ), sehingga Pellet dapat mengenali otomatis semua kasus berjenis warisJual tanpa aturan SWRL tambahan."@id ;
+    rdfs:label "Kasus waris yang lalu dijual"@id .
+
+
+###  :KomponenBiaya
 :KomponenBiaya rdf:type owl:Class ;
-               rdfs:comment "Honorarium, pajak, dan PNBP yang mungkin muncul."@id ;
-               rdfs:label "Komponen biaya"@id .
+    rdfs:comment "Honorarium, pajak, dan PNBP yang mungkin muncul."@id ;
+    rdfs:label "Komponen biaya"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#Lembaga
+###  :Lembaga
 :Lembaga rdf:type owl:Class ;
-         rdfs:comment "Tempat mengurus: kantor notaris, PPAT, pengadilan, BPN, AHU, Dukcapil."@id ;
-         rdfs:label "Lembaga berwenang"@id .
+    rdfs:subClassOf lkif-action:Organisation ;
+    rdfs:comment "Tempat mengurus: kantor notaris, PPAT, pengadilan, BPN, AHU, Dukcapil. Dipetakan ke LKIF action:Organisation."@id ;
+    rdfs:label "Lembaga berwenang"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#ObjekHukum
+###  :ObjekHukum
 :ObjekHukum rdf:type owl:Class ;
-            rdfs:comment "Benda atau hak yang diurus: tanah, bangunan, kendaraan, saham."@id ;
-            rdfs:label "Objek hukum"@id .
+    rdfs:subClassOf lkif-process:Physical_Object ;
+    rdfs:comment "Benda atau hak yang diurus: tanah, bangunan, kendaraan, saham. Dipetakan ke LKIF action:Physical_Object."@id ;
+    rdfs:label "Objek hukum"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#PejabatNotaris
+###  :PejabatNotaris
 :PejabatNotaris rdf:type owl:Class ;
-                rdfs:subClassOf :Tokoh ;
-                rdfs:label "Pejabat notaris"@id .
+    rdfs:subClassOf lkif-lr:Professional_Legal_Role ;
+    rdfs:comment "Peran, bukan orang. Sensor penting: LKIF menyatakan Agent dan Role saling lepas, jadi kelas peran tidak boleh sekaligus subclass Tokoh (Agent)."@id ;
+    rdfs:label "Peran pejabat notaris"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#PejabatPPAT
+###  :PejabatPPAT
 :PejabatPPAT rdf:type owl:Class ;
-             rdfs:subClassOf :Tokoh ;
-             rdfs:label "Pejabat PPAT"@id .
+    rdfs:subClassOf lkif-lr:Professional_Legal_Role ;
+    rdfs:label "Peran pejabat PPAT"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#PeristiwaHukum
+###  :PeristiwaHukum
 :PeristiwaHukum rdf:type owl:Class ;
-                rdfs:comment "Kejadian yang menimbulkan akibat hukum, misalnya jual beli atau pewarisan."@id ;
-                rdfs:label "Peristiwa hukum"@id .
+    rdfs:subClassOf lkif-la:Act_of_Law ;
+    rdfs:comment "Kejadian yang menimbulkan akibat hukum, misalnya jual beli atau pewarisan. Dipetakan ke LKIF legal-action:Act_of_Law."@id ;
+    rdfs:label "Peristiwa hukum"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#SaksiAkta
+###  :SaksiAkta
 :SaksiAkta rdf:type owl:Class ;
-           rdfs:subClassOf :Tokoh ;
-           rdfs:label "Saksi akta"@id .
+    rdfs:subClassOf lkif-lr:Legal_Role ;
+    rdfs:label "Peran saksi akta"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#StatusPenanganan
+###  :StatusPenanganan
 :StatusPenanganan rdf:type owl:Class ;
-                  rdfs:comment "Posisi kasus: belum lengkap, siap ke notaris/PPAT, rujuk pengadilan, tuntas."@id ;
-                  rdfs:label "Status penanganan"@id .
+    rdfs:comment "Posisi kasus: belum lengkap, siap ke notaris/PPAT, rujuk pengadilan, tuntas."@id ;
+    rdfs:label "Status penanganan"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#SuratWaris
+###  :SuratWaris
 :SuratWaris rdf:type owl:Class ;
-            rdfs:subClassOf :Akta ;
-            rdfs:label "Surat keterangan waris"@id .
+    rdfs:subClassOf :Akta ;
+    rdfs:label "Surat keterangan waris"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#Tokoh
+###  :Tokoh
 :Tokoh rdf:type owl:Class ;
-       rdfs:comment "Orang yang terlibat: warga, notaris, PPAT, saksi, ahli waris."@id ;
-       rdfs:label "Tokoh"@id .
+    rdfs:subClassOf lkif-action:Agent ;
+    rdfs:comment "Orang yang terlibat: warga, ahli waris. Dipetakan ke LKIF action:Agent."@id ;
+    rdfs:label "Tokoh"@id .
 
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#WargaAwam
+###  :WargaAwam
 :WargaAwam rdf:type owl:Class ;
-           rdfs:subClassOf :Tokoh ;
-           rdfs:label "Warga awam"@id .
+    rdfs:subClassOf :Tokoh ,
+        lkif-la:Natural_Person ;
+    rdfs:label "Warga awam"@id .
+
+
+###  :UndangUndang
+:UndangUndang rdf:type owl:Class ;
+    rdfs:subClassOf :AturanHukum ;
+    rdfs:comment "Undang-undang sebagai dokumen hukum tertulis; sifat LKIF diwarisi lewat :AturanHukum."@id ;
+    rdfs:label "Undang-undang"@id .
+
+
+###  :PeraturanPemerintah
+:PeraturanPemerintah rdf:type owl:Class ;
+    rdfs:subClassOf :AturanHukum ;
+    rdfs:comment "Peraturan pemerintah sebagai dokumen hukum tertulis; sifat LKIF diwarisi lewat :AturanHukum."@id ;
+    rdfs:label "Peraturan pemerintah"@id .
 
 
 #################################################################
 #    Individuals
+#    Hanya satu individu di T-Box, dan itu disengaja.
+#    Kelas terdefinisi :KasusWarisJual memakai owl:hasValue
+#    (nominal), yang wajib menamai individu bernama; tanpa
+#    individu ini ekspresivitas berhenti di SHIQ(D).
+#    Semua individu aplikasi lain tetap di data/abox.ttl.
 #################################################################
 
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#akta_AJB
-:akta_AJB rdf:type owl:NamedIndividual ,
-                   :AktaJualBeli ;
-          :berdasarPada :aturan_ppat ,
-                        :aturan_tanah ;
-          :perluDaftarDi :lem_bpn ;
-          :penjelasanAwam "Akta jual beli tanah di depan PPAT, lalu balik nama di BPN."@id ;
-          rdfs:label "AJB"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#akta_APHT
-:akta_APHT rdf:type owl:NamedIndividual ,
-                    :AktaHakTanggungan ;
-           :berdasarPada :aturan_uuht ;
-           :perluDaftarDi :lem_bpn ;
-           :penjelasanAwam "Akta pokok jaminan tanah untuk kredit bank: dibuat di PPAT lalu didaftar ke BPN. Didahului SKMHT bila pemilik tidak hadir."@id ;
-           rdfs:label "APHT"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#akta_CV
-:akta_CV rdf:type owl:NamedIndividual ,
-                  :AktaCV ;
-         :perluDaftarDi :lem_ahu ;
-         :penjelasanAwam "Persekutuan komanditer untuk usaha kecil menengah."@id ;
-         rdfs:label "CV"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#akta_PHB
-:akta_PHB rdf:type owl:NamedIndividual ,
-                   :AktaBagiWaris ;
-          :berdasarPada :aturan_ppat ;
-          :perluDaftarDi :lem_bpn ;
-          :penjelasanAwam "Akta pembagian hak bersama untuk waris yang sudah sepakat."@id ;
-          rdfs:label "APHB"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#akta_PTbiasa
-:akta_PTbiasa rdf:type owl:NamedIndividual ,
-                       :AktaPTBiasa ;
-              :berdasarPada :aturan_pt ;
-              :perluDaftarDi :lem_ahu ;
-              :penjelasanAwam "Perseroan 2+ pendiri dengan akta notaris."@id ;
-              rdfs:label "PT biasa"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#akta_PTperorangan
-:akta_PTperorangan rdf:type owl:NamedIndividual ,
-                            :AktaPTPerorangan ;
-                   :berdasarPada :aturan_pt ;
-                   :perluDaftarDi :lem_ahu ;
-                   :penjelasanAwam "Badan usaha 1 orang, daftar online ke AHU, cocok untuk mikro."@id ;
-                   rdfs:label "PT perorangan"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#akta_SKMHT
-:akta_SKMHT rdf:type owl:NamedIndividual ,
-                     :SuratKuasaMembebankan ;
-            :berdasarPada :aturan_uuht ;
-            :penjelasanAwam "Kuasa otentik agar bank/notaris bisa memasang APHT. Bukan jaminan itu sendiri dan tidak didaftar ke BPN; wajib disusul APHT."@id ;
-            rdfs:label "SKMHT"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#akta_fidusia
-:akta_fidusia rdf:type owl:NamedIndividual ,
-                       :AktaFidusia ;
-              :berdasarPada :aturan_fidusia ;
-              :perluDaftarDi :lem_ahu ;
-              :penjelasanAwam "Jaminan tanpa serah barang: motor tetap dipakai tapi terikat utang."@id ;
-              rdfs:label "Akta fidusia"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#akta_hibah
-:akta_hibah rdf:type owl:NamedIndividual ,
-                     :AktaHibahTanah ;
-            :berdasarPada :aturan_ppat ;
-            :perluDaftarDi :lem_bpn ;
-            :penjelasanAwam "Akta pemberian tanah cuma-cuma, dibuat di PPAT."@id ;
-            rdfs:label "Akta hibah"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#akta_kawin
-:akta_kawin rdf:type owl:NamedIndividual ,
-                     :AktaPerjanjianKawin ;
-            :berdasarPada :aturan_kawin ;
-            :perluDaftarDi :lem_dukcapil ;
-            :penjelasanAwam "Atur pisah harta, dibuat di notaris lalu dicatat di Dukcapil."@id ;
-            rdfs:label "Perjanjian kawin"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#akta_wasiat
-:akta_wasiat rdf:type owl:NamedIndividual ,
-                      :AktaWasiat ;
-             :berdasarPada :aturan_uujn ;
-             :perluDaftarDi :lem_ahu ;
-             :penjelasanAwam "Wasiat resmi di notaris dan didaftar ke Kemenkumham."@id ;
-             rdfs:label "Akta wasiat"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_fidusia
-:aturan_fidusia rdf:type owl:NamedIndividual ,
-                         :AturanHukum ;
-                :penjelasanAwam "Dasar hukum jaminan utang tanpa serah barang, misalnya motor atau tanah."@id ;
-                rdfs:label "UU Fidusia 42/1999"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_kawin
-:aturan_kawin rdf:type owl:NamedIndividual ,
-                       :AturanHukum ;
-              :penjelasanAwam "Aturan perkawinan, termasuk nyatanya hak milik bersama sejak pasangan nikah."@id ;
-              rdfs:label "UU Perkawinan + MK 69/2015"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_ppat
-:aturan_ppat rdf:type owl:NamedIndividual ,
-                      :AturanHukum ;
-             :terkaitAturan :aturan_tanah ;
-             :penjelasanAwam "Aturan khusus akta tanah."@id ;
-             rdfs:label "Aturan PPAT (PP 24/2016)"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_pt
-:aturan_pt rdf:type owl:NamedIndividual ,
-                    :AturanHukum ;
-           :penjelasanAwam "Dasar pendirian perusahaan, termasuk PT perorangan dengan satu pemilik."@id ;
-           rdfs:label "UU PT + Cipta Kerja PT perorangan"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_tanah
-:aturan_tanah rdf:type owl:NamedIndividual ,
-                       :AturanHukum ;
-              :penjelasanAwam "Dasar hak atas tanah dan pendaftaran SHM, HGB, atau hak pakai."@id ;
-              rdfs:label "Aturan tanah (UUPA + PP 18/2021)"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_uuht
-:aturan_uuht rdf:type owl:NamedIndividual ,
-                      :AturanHukum ;
-             :penjelasanAwam "UUHT No.4/1996: APHT dibuat di PPAT dan didaftar ke BPN; SKMHT hanya kuasa pendahulu yang wajib disusul APHT."@id ;
-             rdfs:label "UUHT No.4/1996"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_uujn
-:aturan_uujn rdf:type owl:NamedIndividual ,
-                      :AturanHukum ;
-             :terkaitAturan :aturan_ppat ;
-             :penjelasanAwam "Aturan wewenang notaris dan akta otentik."@id ;
-             rdfs:label "UUJN No.2/2014"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_warisIslam
-:aturan_warisIslam rdf:type owl:NamedIndividual ,
-                            :AturanHukum ;
-                   :penjelasanAwam "Pembagian warisan bagi umat Islam, memakai hukum furu'ah."@id ;
-                   rdfs:label "KHI waris Islam"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_warisPerdata
-:aturan_warisPerdata rdf:type owl:NamedIndividual ,
-                              :AturanHukum ;
-                     :penjelasanAwam "Pembagian warisan bagi yang berlaku hukum perdata, bukan hukum Islam."@id ;
-                     rdfs:label "KUHPerdata waris"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#biaya_BPHTB
-:biaya_BPHTB rdf:type owl:NamedIndividual ,
-                      :KomponenBiaya ;
-             :penjelasanAwam "Pajak pembeli/hibah, urus di Bapenda."@id ;
-             rdfs:label "BPHTB"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#biaya_PNBP_AHU
-:biaya_PNBP_AHU rdf:type owl:NamedIndividual ,
-                         :KomponenBiaya ;
-                :penjelasanAwam "Pungutan resmi negara saat pendaftaran perusahaan di AHU."@id ;
-                rdfs:label "PNBP AHU"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#biaya_PNBP_BPN
-:biaya_PNBP_BPN rdf:type owl:NamedIndividual ,
-                         :KomponenBiaya ;
-                :penjelasanAwam "Pungutan resmi BPN saat proses balik nama tanah."@id ;
-                rdfs:label "PNBP BPN balik nama"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#biaya_PPh
-:biaya_PPh rdf:type owl:NamedIndividual ,
-                    :KomponenBiaya ;
-           :penjelasanAwam "Pajak penghasilan dari sisi penjual, umumnya 2,5% dari nilai jual."@id ;
-           rdfs:label "PPh penjual"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#biaya_honorNotaris
-:biaya_honorNotaris rdf:type owl:NamedIndividual ,
-                             :KomponenBiaya ;
-                    :penjelasanAwam "Honor jasa notaris untuk akta yang dibuatnya."@id ;
-                    rdfs:label "honorarium notaris"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#biaya_honorPPAT
-:biaya_honorPPAT rdf:type owl:NamedIndividual ,
-                          :KomponenBiaya ;
-                 :penjelasanAwam "Honor jasa PPAT untuk akta yang dibuat di hadapannya."@id ;
-                 rdfs:label "honorarium PPAT"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dok_AktaKematian
-:dok_AktaKematian rdf:type owl:NamedIndividual ,
-                           :DokumenSyarat ;
-                  rdfs:label "Akta kematian"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dok_AktaNikah
-:dok_AktaNikah rdf:type owl:NamedIndividual ,
-                        :DokumenSyarat ;
-               rdfs:label "Akta nikah"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dok_BPKB
-:dok_BPKB rdf:type owl:NamedIndividual ,
-                   :DokumenSyarat ;
-          rdfs:label "BPKB / faktur kendaraan"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dok_KK
-:dok_KK rdf:type owl:NamedIndividual ,
-                 :DokumenSyarat ;
-        rdfs:label "KK"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dok_KTP
-:dok_KTP rdf:type owl:NamedIndividual ,
-                  :DokumenSyarat ;
-         rdfs:label "KTP"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dok_NPWP
-:dok_NPWP rdf:type owl:NamedIndividual ,
-                   :DokumenSyarat ;
-          rdfs:label "NPWP"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dok_PBB
-:dok_PBB rdf:type owl:NamedIndividual ,
-                  :DokumenSyarat ;
-         rdfs:label "SPPT PBB + bukti lunas"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dok_PersetujuanPasangan
-:dok_PersetujuanPasangan rdf:type owl:NamedIndividual ,
-                                  :DokumenSyarat ;
-                         rdfs:label "Persetujuan pasangan"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dok_SHM
-:dok_SHM rdf:type owl:NamedIndividual ,
-                  :DokumenSyarat ;
-         rdfs:label "Sertifikat tanah (SHM/HGB)"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dok_SKWaris
-:dok_SKWaris rdf:type owl:NamedIndividual ,
-                      :DokumenSyarat ;
-             rdfs:label "Surat keterangan waris"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dok_draftAD
-:dok_draftAD rdf:type owl:NamedIndividual ,
-                      :DokumenSyarat ;
-             rdfs:label "Konsep nama + anggaran dasar usaha"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dok_modalSetor
-:dok_modalSetor rdf:type owl:NamedIndividual ,
-                         :DokumenSyarat ;
-                rdfs:label "Bukti modal disetor"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dok_suratKuasa
-:dok_suratKuasa rdf:type owl:NamedIndividual ,
-                         :DokumenSyarat ;
-                rdfs:label "Surat kuasa (bila dikuasakan)"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dok_utangPiutang
-:dok_utangPiutang rdf:type owl:NamedIndividual ,
-                           :DokumenSyarat ;
-                  rdfs:label "Perjanjian utang pokok"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#kasus_cv
-:kasus_cv rdf:type owl:NamedIndividual ,
-                   :KasusTriage ;
-          :berstatus :status_siapNotaris ;
-          :butuhAkta :akta_CV ;
-          :dasarKasus :aturan_pt ;
-          :dikenaiBiaya :biaya_PNBP_AHU ,
-                        :biaya_honorNotaris ;
-          :ditanganiOleh :lem_notaris ;
-          :punyaJenis :trans_dirikanUsaha ;
-          :punyaObjek :obj_sahamUsaha ;
-          :adaSepakat "true"^^xsd:boolean ;
-          :cakapHukum "true"^^xsd:boolean ;
-          :jumlahPendiri 2 ;
-          :modalKecil "true"^^xsd:boolean ;
-          :perkiraanBiaya "Honor notaris + PNBP AHU."@id ;
-          :perkiraanWaktu "Akta 3-7 hari; pendaftaran AHU 3-5 hari."@id ;
-          :saranLangkah "Siapkan KTP pendiri + konsep usaha, buat akta CV di notaris, daftar ke AHU."@id ;
-          rdfs:label "Kasus 6: dirikan CV berdua"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#kasus_fidusia_motor
-:kasus_fidusia_motor rdf:type owl:NamedIndividual ,
-                              :KasusTriage ;
-                     :berstatus :status_siapNotaris ;
-                     :butuhAkta :akta_fidusia ;
-                     :dasarKasus :aturan_fidusia ;
-                     :dikenaiBiaya :biaya_PNBP_AHU ,
-                                   :biaya_honorNotaris ;
-                     :ditanganiOleh :lem_notaris ;
-                     :punyaJenis :trans_utangJaminan ;
-                     :punyaObjek :obj_kendaraan ;
-                     :adaSepakat "true"^^xsd:boolean ;
-                     :cakapHukum "true"^^xsd:boolean ;
-                     :perkiraanBiaya "Honor notaris + PNBP fidusia."@id ;
-                     :perkiraanWaktu "Akta 1-3 hari; daftar online 1 hari."@id ;
-                     :saranLangkah "Bawa BPKB + perjanjian utang, buat akta fidusia di notaris, daftarkan online."@id ;
-                     rdfs:label "Kasus 7: utang jaminan motor"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#kasus_hibah_tanah
-:kasus_hibah_tanah rdf:type owl:NamedIndividual ,
-                            :KasusTriage ;
-                   :berstatus :status_siapPPAT ;
-                   :butuhAkta :akta_hibah ;
-                   :dasarKasus :aturan_ppat ;
-                   :dikenaiBiaya :biaya_BPHTB ,
-                                 :biaya_PNBP_BPN ,
-                                 :biaya_honorPPAT ;
-                   :ditanganiOleh :lem_ppat ;
-                   :punyaJenis :trans_hibah ;
-                   :punyaObjek :obj_tanahSHM ;
-                   :adaSepakat "true"^^xsd:boolean ;
-                   :adaSertifikat "true"^^xsd:boolean ;
-                   :cakapHukum "true"^^xsd:boolean ;
-                   :perkiraanBiaya "Honor PPAT + BPHTB hibah + PNBP BPN."@id ;
-                   :perkiraanWaktu "Akta hibah 1-7 hari; balik nama 5-14 hari."@id ;
-                   :saranLangkah "Siapkan SHM + PBB + KK yang menunjukkan hubungan, tanda tangan akta hibah di PPAT."@id ;
-                   rdfs:label "Kasus 4: hibah tanah ke anak"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#kasus_jualbeli_shm
-:kasus_jualbeli_shm rdf:type owl:NamedIndividual ,
-                             :KasusTriage ;
-                    :berstatus :status_siapPPAT ;
-                    :butuhAkta :akta_AJB ;
-                    :butuhDokumen :dok_NPWP ,
-                                  :dok_PBB ,
-                                  :dok_SHM ;
-                    :dasarKasus :aturan_ppat ,
-                                :aturan_tanah ;
-                    :dikenaiBiaya :biaya_BPHTB ,
-                                  :biaya_PNBP_BPN ,
-                                  :biaya_PPh ,
-                                  :biaya_honorPPAT ;
-                    :ditanganiOleh :lem_ppat ;
-                    :punyaJenis :trans_jualBeli ;
-                    :punyaObjek :obj_tanahSHM ;
-                    :sudahPunyaDokumen :dok_KK ,
-                                       :dok_KTP ;
-                    :adaSepakat "true"^^xsd:boolean ;
-                    :adaSertifikat "true"^^xsd:boolean ;
-                    :cakapHukum "true"^^xsd:boolean ;
-                    :perkiraanBiaya "Honor PPAT + BPHTB (±5% NPOP-NPOPTKP) + PPh 2,5% + PNBP BPN."@id ;
-                    :perkiraanWaktu "AJB 1-7 hari bila berkas lengkap; balik nama BPN 5-14 hari."@id ;
-                    :saranLangkah "Lengkapi SHM + PBB, cek keaslian di BPN, tanda tangan AJB di PPAT, lalu balik nama."@id ;
-                    rdfs:label "Kasus 1: jual beli SHM biasa"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#kasus_kawin
-:kasus_kawin rdf:type owl:NamedIndividual ,
-                      :KasusTriage ;
-             :berstatus :status_siapNotaris ;
-             :butuhAkta :akta_kawin ;
-             :dasarKasus :aturan_kawin ;
-             :dikenaiBiaya :biaya_honorNotaris ;
-             :ditanganiOleh :lem_notaris ;
-             :punyaJenis :trans_kawinHarta ;
-             :punyaObjek :obj_hartaKawin ;
-             :adaSepakat "true"^^xsd:boolean ;
-             :cakapHukum "true"^^xsd:boolean ;
-             :perkiraanBiaya "Honor notaris + biaya pencatatan."@id ;
-             :perkiraanWaktu "Akta 1-3 hari; pencatatan 3-7 hari."@id ;
-             :saranLangkah "Buat sebelum/sesudah nikah di notaris, lalu catatkan ke Dukcapil dan KUA/Dukcapil."@id ;
-             rdfs:label "Kasus 9: perjanjian pisah harta"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#kasus_ptperorangan
-:kasus_ptperorangan rdf:type owl:NamedIndividual ,
-                             :KasusTriage ;
-                    :berstatus :status_siapNotaris ;
-                    :butuhAkta :akta_PTperorangan ;
-                    :dasarKasus :aturan_pt ;
-                    :dikenaiBiaya :biaya_PNBP_AHU ;
-                    :ditanganiOleh :lem_ahu ;
-                    :punyaJenis :trans_dirikanUsaha ;
-                    :punyaObjek :obj_sahamUsaha ;
-                    :adaSepakat "true"^^xsd:boolean ;
-                    :cakapHukum "true"^^xsd:boolean ;
-                    :jumlahPendiri 1 ;
-                    :modalKecil "true"^^xsd:boolean ;
-                    :perkiraanBiaya "PNBP AHU ±50rb + materai; notaris opsional."@id ;
-                    :perkiraanWaktu "1-3 hari online bila nama lolos."@id ;
-                    :saranLangkah "Cek nama di AHU Online, isi pernyataan pendirian, daftar. Notaris opsional tapi disarankan."@id ;
-                    rdfs:label "Kasus 5: dirikan PT perorangan"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#kasus_waris_belumSKW
-:kasus_waris_belumSKW rdf:type owl:NamedIndividual ,
-                               :KasusTriage ;
-                      :berstatus :status_belumLengkap ;
-                      :butuhAkta :akta_AJB ;
-                      :butuhDokumen :dok_PBB ,
-                                    :dok_SHM ,
-                                    :dok_SKWaris ;
-                      :dasarKasus :aturan_ppat ,
-                                  :aturan_warisPerdata ;
-                      :dikenaiBiaya :biaya_BPHTB ,
-                                    :biaya_honorPPAT ;
-                      :ditanganiOleh :lem_ppat ;
-                      :punyaJenis :trans_warisJual ;
-                      :punyaObjek :obj_tanahWaris ;
-                      :sudahPunyaDokumen :dok_AktaKematian ,
-                                         :dok_KTP ;
-                      :adaSKWaris "false"^^xsd:boolean ;
-                      :adaSepakat "true"^^xsd:boolean ;
-                      :adaSertifikat "true"^^xsd:boolean ;
-                      :cakapHukum "true"^^xsd:boolean ;
-                      :perkiraanBiaya "Biaya SKW kecil; AJB + BPHTB + PPh waris bila ada."@id ;
-                      :perkiraanWaktu "SKW 7-14 hari; AJB setelahnya 1-7 hari."@id ;
-                      :saranLangkah "Urus SK waris dulu (kelurahan/notaris), baru bisa AJB. Jangan tanda tangan apa pun sebelum SKW jadi."@id ;
-                      rdfs:label "Kasus 2: jual warisan belum ada SKW"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#kasus_waris_sengketa
-:kasus_waris_sengketa rdf:type owl:NamedIndividual ,
-                               :KasusTriage ;
-                      :berstatus :status_rujukPengadilan ;
-                      :butuhAkta :akta_PHB ;
-                      :ditanganiOleh :lem_pengadilan ;
-                      :punyaJenis :trans_warisBagi ;
-                      :punyaObjek :obj_tanahWaris ;
-                      :adaSKWaris "false"^^xsd:boolean ;
-                      :adaSepakat "false"^^xsd:boolean ;
-                      :adaSertifikat "true"^^xsd:boolean ;
-                      :cakapHukum "true"^^xsd:boolean ;
-                      :perkiraanBiaya "Biaya mediasi/panjar perkara sesuai pengadilan."@id ;
-                      :perkiraanWaktu "Mediasi 2-4 minggu; pengadilan 2-6 bulan."@id ;
-                      :saranLangkah "Tidak bisa akta dulu. Mediasi keluarga atau penetapan pengadilan agama/negeri dulu."@id ;
-                      rdfs:label "Kasus 3: waris tidak sepakat"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#kasus_wasiat
-:kasus_wasiat rdf:type owl:NamedIndividual ,
-                       :KasusTriage ;
-              :berstatus :status_siapNotaris ;
-              :butuhAkta :akta_wasiat ;
-              :dasarKasus :aturan_uujn ;
-              :dikenaiBiaya :biaya_PNBP_AHU ,
-                            :biaya_honorNotaris ;
-              :ditanganiOleh :lem_notaris ;
-              :punyaJenis :trans_wasiat ;
-              :punyaObjek :obj_tanahWaris ;
-              :adaSepakat "true"^^xsd:boolean ;
-              :cakapHukum "true"^^xsd:boolean ;
-              :perkiraanBiaya "Honor notaris + PNBP daftar wasiat."@id ;
-              :perkiraanWaktu "1 hari bila syarat lengkap."@id ;
-              :saranLangkah "Datang sehat jasmani + 2 saksi, buat wasiat di notaris, pastikan didaftar ke daftar wasiat."@id ;
-              rdfs:label "Kasus 8: buat wasiat"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#lem_ahu
-:lem_ahu rdf:type owl:NamedIndividual ,
-                  :Lembaga ;
-         :penjelasanAwam "Sistem online untuk pengesahan PT, CV, fidusia, wasiat."@id ;
-         rdfs:label "AHU Kemenkumham"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#lem_bpn
-:lem_bpn rdf:type owl:NamedIndividual ,
-                  :Lembaga ;
-         :penjelasanAwam "Kantor pertanahan untuk balik nama sertifikat."@id ;
-         rdfs:label "BPN / ATR"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#lem_dukcapil
-:lem_dukcapil rdf:type owl:NamedIndividual ,
-                       :Lembaga ;
-              :penjelasanAwam "Catatan sipil untuk KK, akta nikah, kematian, perjanjian kawin."@id ;
-              rdfs:label "Dukcapil"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#lem_notaris
-:lem_notaris rdf:type owl:NamedIndividual ,
-                      :Lembaga ;
-             :penjelasanAwam "Pejabat yang bikin akta otentik umum: PT, fidusia, wasiat, perjanjian kawin."@id ;
-             rdfs:label "kantor notaris"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#lem_pajak
-:lem_pajak rdf:type owl:NamedIndividual ,
-                    :Lembaga ;
-           :penjelasanAwam "Urus PPh, BPHTB, dan validasi pajak jual beli/hibah."@id ;
-           rdfs:label "kantor pajak / Bapenda"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#lem_pengadilan
-:lem_pengadilan rdf:type owl:NamedIndividual ,
-                         :Lembaga ;
-                :penjelasanAwam "Dipakai kalau ada sengketa atau penetapan waris yang diperebutkan."@id ;
-                rdfs:label "pengadilan negeri / agama"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#lem_ppat
-:lem_ppat rdf:type owl:NamedIndividual ,
-                   :Lembaga ;
-          :penjelasanAwam "Pejabat khusus tanah: AJB, hibah tanah, APHB, tanggungan."@id ;
-          rdfs:label "kantor PPAT"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#obj_bangunan
-:obj_bangunan rdf:type owl:NamedIndividual ,
-                       :ObjekHukum ;
-              :penjelasanAwam "Rumah, ruko, atau bangunan di atas sebidang tanah."@id ;
-              rdfs:label "bangunan"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#obj_hartaKawin
-:obj_hartaKawin rdf:type owl:NamedIndividual ,
-                         :ObjekHukum ;
-                :penjelasanAwam "Harta yang terbentuk selama perkawinan, termasuk yang baru dipakai bersama."@id ;
-                rdfs:label "harta kawin"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#obj_kendaraan
-:obj_kendaraan rdf:type owl:NamedIndividual ,
-                        :ObjekHukum ;
-               :penjelasanAwam "Motor, mobil, atau kendaraan lain yang mempunyai BPKB."@id ;
-               rdfs:label "kendaraan bermotor"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#obj_mesinUsaha
-:obj_mesinUsaha rdf:type owl:NamedIndividual ,
-                         :ObjekHukum ;
-                :penjelasanAwam "Peralatan dan stok yang dipakai untuk menjalankan usaha."@id ;
-                rdfs:label "mesin dan stok usaha"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#obj_sahamUsaha
-:obj_sahamUsaha rdf:type owl:NamedIndividual ,
-                         :ObjekHukum ;
-                :penjelasanAwam "Kepemilikan saham atau bagian di dalam sebuah perusahaan."@id ;
-                rdfs:label "saham usaha"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#obj_tanahHGB
-:obj_tanahHGB rdf:type owl:NamedIndividual ,
-                       :ObjekHukum ;
-              :penjelasanAwam "Tanah Hak Guna Bangunan, biasa untuk ruko atau perusahaan."@id ;
-              rdfs:label "tanah HGB"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#obj_tanahSHM
-:obj_tanahSHM rdf:type owl:NamedIndividual ,
-                       :ObjekHukum ;
-              :penjelasanAwam "Tanah yang sudah bersertifikat Hak Milik."@id ;
-              rdfs:label "tanah SHM"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#obj_tanahWaris
-:obj_tanahWaris rdf:type owl:NamedIndividual ,
-                         :ObjekHukum ;
-                :penjelasanAwam "Tanah peninggalan yang belum dibagi."@id ;
-                rdfs:label "tanah warisan"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#status_belumLengkap
-:status_belumLengkap rdf:type owl:NamedIndividual ,
-                              :StatusPenanganan ;
-                     :penjelasanAwam "Masih ada dokumen atau syarat kurang, belum bisa ke pejabat."@id ;
-                     rdfs:label "belum lengkap"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#status_perluCekDok
-:status_perluCekDok rdf:type owl:NamedIndividual ,
-                             :StatusPenanganan ;
-                    :penjelasanAwam "Berkas belum lengkap; ada dokumen yang kurang atau belum berlaku."@id ;
-                    rdfs:label "perlu cek dokumen"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#status_rujukPengadilan
-:status_rujukPengadilan rdf:type owl:NamedIndividual ,
-                                 :StatusPenanganan ;
-                        :penjelasanAwam "Para pihak tidak sepakat; perlu mediasi dulu sebelum ke pengadilan."@id ;
-                        rdfs:label "rujuk pengadilan/mediasi"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#status_siapNotaris
-:status_siapNotaris rdf:type owl:NamedIndividual ,
-                             :StatusPenanganan ;
-                    :penjelasanAwam "Berkas sudah cukup; silakan datang bawa dokumennya ke notaris."@id ;
-                    rdfs:label "siap ke notaris"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#status_siapPPAT
-:status_siapPPAT rdf:type owl:NamedIndividual ,
-                          :StatusPenanganan ;
-                 :penjelasanAwam "Berkas sudah cukup; silakan datang ke kantor PPAT untuk akta."@id ;
-                 rdfs:label "siap ke PPAT"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#status_tuntasAwal
-:status_tuntasAwal rdf:type owl:NamedIndividual ,
-                            :StatusPenanganan ;
-                   :penjelasanAwam "Tuntas di tahap awal: instansi dan akta sudah jelas, tinggal eksekusi berkas."@id ;
-                   rdfs:label "tuntas tahap awal"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#surat_SKW
-:surat_SKW rdf:type owl:NamedIndividual ,
-                    :SuratWaris ;
-           :penjelasanAwam "Surat siapa saja ahli warisnya, dibuat di kelurahan/notaris/balai harta."@id ;
-           rdfs:label "Surat keterangan waris"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#trans_dirikanUsaha
-:trans_dirikanUsaha rdf:type owl:NamedIndividual ,
-                             :JenisTransaksi ;
-                    :penjelasanAwam "Mau bikin usaha resmi: PT perorangan, PT biasa, atau CV."@id ;
-                    rdfs:label "dirikan usaha"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#trans_hibah
-:trans_hibah rdf:type owl:NamedIndividual ,
-                      :JenisTransaksi ;
-             :penjelasanAwam "Pemberian tanah cuma-cuma ke anak atau kerabat selagi hidup."@id ;
-             rdfs:label "hibah tanah"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#trans_jualBeli
-:trans_jualBeli rdf:type owl:NamedIndividual ,
-                         :JenisTransaksi ;
-                :penjelasanAwam "Ada penjual dan pembeli tanah, mau pindah nama sertifikat."@id ;
-                rdfs:label "jual beli tanah"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#trans_kawinHarta
-:trans_kawinHarta rdf:type owl:NamedIndividual ,
-                           :JenisTransaksi ;
-                  :penjelasanAwam "Calon suami istri mau atur pisah atau gabung harta."@id ;
-                  rdfs:label "atur harta kawin"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#trans_utangJaminan
-:trans_utangJaminan rdf:type owl:NamedIndividual ,
-                             :JenisTransaksi ;
-                    :penjelasanAwam "Pinjam uang dengan jaminan motor, mesin, atau stok dagangan."@id ;
-                    rdfs:label "utang dengan jaminan"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#trans_warisBagi
-:trans_warisBagi rdf:type owl:NamedIndividual ,
-                          :JenisTransaksi ;
-                 :penjelasanAwam "Keluarga mau membagi harta peninggalan secara resmi."@id ;
-                 rdfs:label "bagi waris"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#trans_warisJual
+###  :trans_warisJual
 :trans_warisJual rdf:type owl:NamedIndividual ,
-                          :JenisTransaksi ;
-                 :penjelasanAwam "Tanah peninggalan keluarga mau dijual, belum tentu sudah balik nama."@id ;
-                 rdfs:label "jual tanah warisan"@id .
-
-
-###  http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#trans_wasiat
-:trans_wasiat rdf:type owl:NamedIndividual ,
-                       :JenisTransaksi ;
-              :penjelasanAwam "Pesan terakhir tentang siapa dapat apa setelah meninggal."@id ;
-              rdfs:label "wasiat"@id .
+        :JenisTransaksi .
 
 
 #################################################################
-#    SWRL rules R1-R8 (ditulis manual; jangan biarkan Protege
-#    menulis ulang bagian ini — validasi ulang setelah save)
+#    SWRL rules R1-R8
+#    Gaya mengikuti slide 8: badan memuat atom kelas dan atom
+#    properti (objek maupun data), kepala memuat fakta baru.
+#    Mesin penalar: Pellet di Protégé (bukan dari Python).
 #################################################################
 
-:rule_R1 a swrl:Imp ;
-    rdfs:label "R1 — Jual beli tanah bersertifikat dan sepakat wajib PPAT AJB"@id ;
-    rdfs:comment "Jika jenis=jualBeli dan objek=tanahSHM dan ada sertifikat dan sepakat maka arahkan ke PPAT dengan AJB."@id ;
-    swrl:body (
-        [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_jualBeli ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaObjek ; swrl:argument1 :var_k ; swrl:argument2 :obj_tanahSHM ]
-        [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :adaSertifikat ; swrl:argument1 :var_k ; swrl:argument2 true ]
-        [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :adaSepakat ; swrl:argument1 :var_k ; swrl:argument2 true ]
-    ) ;
-    swrl:head (
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :ditanganiOleh ; swrl:argument1 :var_k ; swrl:argument2 :lem_ppat ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :butuhAkta ; swrl:argument1 :var_k ; swrl:argument2 :akta_AJB ]
-    ) .
+###  R1
+[ a swrl:Imp ;
+    rdfs:label "R1 - Jual beli tanah bersertifikat dan sepakat ke PPAT dengan AJB"@id ;
+    rdfs:comment "Jika jenis jualBeli, objek tanahSHM, ada sertifikat, dan sepakat, maka arahkan ke PPAT dengan AJB."@id ;
+    swrl:body [ a swrl:AtomList ;
+          rdf:first [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_jualBeli ] ;
+                      rdf:rest [ a swrl:AtomList ;
+                                  rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaObjek ; swrl:argument1 :var_k ; swrl:argument2 :obj_tanahSHM ] ;
+                                  rdf:rest [ a swrl:AtomList ;
+                                              rdf:first [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :adaSertifikat ; swrl:argument1 :var_k ; swrl:argument2 true ] ;
+                                              rdf:rest [ a swrl:AtomList ;
+                                                          rdf:first [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :adaSepakat ; swrl:argument1 :var_k ; swrl:argument2 true ] ;
+                                                          rdf:rest rdf:nil ] ] ] ] ] ;
+    swrl:head [ a swrl:AtomList ;
+          rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :ditanganiOleh ; swrl:argument1 :var_k ; swrl:argument2 :lem_ppat ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :butuhAkta ; swrl:argument1 :var_k ; swrl:argument2 :akta_AJB ] ;
+                      rdf:rest rdf:nil ] ] ] .
 
-:rule_R2 a swrl:Imp ;
-    rdfs:label "R2 — Warisan tanpa SKW berarti belum lengkap"@id ;
-    rdfs:comment "Jika jenis=warisJual dan belum ada SKW maka status belum lengkap dan butuh dokumen SKW."@id ;
-    swrl:body (
-        [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_warisJual ]
-        [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :adaSKWaris ; swrl:argument1 :var_k ; swrl:argument2 false ]
-    ) ;
-    swrl:head (
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :berstatus ; swrl:argument1 :var_k ; swrl:argument2 :status_belumLengkap ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :butuhDokumen ; swrl:argument1 :var_k ; swrl:argument2 :dok_SKWaris ]
-    ) .
 
-:rule_R3 a swrl:Imp ;
-    rdfs:label "R3 — Waris tidak sepakat rujuk pengadilan"@id ;
-    rdfs:comment "Jika jenis=warisBagi dan para pihak tidak sepakat maka rujuk pengadilan/mediasi."@id ;
-    swrl:body (
-        [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_warisBagi ]
-        [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :adaSepakat ; swrl:argument1 :var_k ; swrl:argument2 false ]
-    ) ;
-    swrl:head (
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :ditanganiOleh ; swrl:argument1 :var_k ; swrl:argument2 :lem_pengadilan ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :berstatus ; swrl:argument1 :var_k ; swrl:argument2 :status_rujukPengadilan ]
-    ) .
+###  R2
+[ a swrl:Imp ;
+    rdfs:label "R2 - Warisan tanpa SKW berarti belum lengkap"@id ;
+    rdfs:comment "Jika jenis warisJual dan belum ada SKW, maka status belum lengkap dan butuh dokumen SKW."@id ;
+    swrl:body [ a swrl:AtomList ;
+          rdf:first [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_warisJual ] ;
+                      rdf:rest [ a swrl:AtomList ;
+                                  rdf:first [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :adaSKWaris ; swrl:argument1 :var_k ; swrl:argument2 false ] ;
+                                  rdf:rest rdf:nil ] ] ] ;
+    swrl:head [ a swrl:AtomList ;
+          rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :berstatus ; swrl:argument1 :var_k ; swrl:argument2 :status_belumLengkap ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :butuhDokumen ; swrl:argument1 :var_k ; swrl:argument2 :dok_SKWaris ] ;
+                      rdf:rest rdf:nil ] ] ] .
 
-:rule_R4 a swrl:Imp ;
-    rdfs:label "R4 — Hibah tanah ke PPAT dengan BPHTB"@id ;
-    rdfs:comment "Jika jenis=hibah dan objek=tanahSHM maka ke PPAT dengan akta hibah dan kena BPHTB."@id ;
-    swrl:body (
-        [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_hibah ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaObjek ; swrl:argument1 :var_k ; swrl:argument2 :obj_tanahSHM ]
-    ) ;
-    swrl:head (
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :ditanganiOleh ; swrl:argument1 :var_k ; swrl:argument2 :lem_ppat ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :butuhAkta ; swrl:argument1 :var_k ; swrl:argument2 :akta_hibah ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :dikenaiBiaya ; swrl:argument1 :var_k ; swrl:argument2 :biaya_BPHTB ]
-    ) .
 
-:rule_R5 a swrl:Imp ;
-    rdfs:label "R5 — Usaha 1 pendiri modal kecil ke PT perorangan"@id ;
-    rdfs:comment "Jika jenis=dirikanUsaha dengan 1 pendiri dan modal kecil maka ke PT perorangan via AHU."@id ;
-    swrl:body (
-        [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_dirikanUsaha ]
-        [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :jumlahPendiri ; swrl:argument1 :var_k ; swrl:argument2 1 ]
-        [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :modalKecil ; swrl:argument1 :var_k ; swrl:argument2 true ]
-    ) ;
-    swrl:head (
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :butuhAkta ; swrl:argument1 :var_k ; swrl:argument2 :akta_PTperorangan ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :ditanganiOleh ; swrl:argument1 :var_k ; swrl:argument2 :lem_ahu ]
-    ) .
+###  R3
+[ a swrl:Imp ;
+    rdfs:label "R3 - Waris tidak sepakat rujuk pengadilan"@id ;
+    rdfs:comment "Jika jenis warisBagi dan para pihak tidak sepakat, maka rujuk pengadilan atau mediasi."@id ;
+    swrl:body [ a swrl:AtomList ;
+          rdf:first [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_warisBagi ] ;
+                      rdf:rest [ a swrl:AtomList ;
+                                  rdf:first [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :adaSepakat ; swrl:argument1 :var_k ; swrl:argument2 false ] ;
+                                  rdf:rest rdf:nil ] ] ] ;
+    swrl:head [ a swrl:AtomList ;
+          rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :ditanganiOleh ; swrl:argument1 :var_k ; swrl:argument2 :lem_pengadilan ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :berstatus ; swrl:argument1 :var_k ; swrl:argument2 :status_rujukPengadilan ] ;
+                      rdf:rest rdf:nil ] ] ] .
 
-:rule_R6 a swrl:Imp ;
-    rdfs:label "R6 — Utang jaminan kendaraan ke notaris fidusia"@id ;
-    rdfs:comment "Jika jenis=utangJaminan dan objek=kendaraan maka ke notaris dengan akta fidusia."@id ;
-    swrl:body (
-        [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_utangJaminan ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaObjek ; swrl:argument1 :var_k ; swrl:argument2 :obj_kendaraan ]
-    ) ;
-    swrl:head (
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :ditanganiOleh ; swrl:argument1 :var_k ; swrl:argument2 :lem_notaris ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :butuhAkta ; swrl:argument1 :var_k ; swrl:argument2 :akta_fidusia ]
-    ) .
 
-:rule_R7 a swrl:Imp ;
-    rdfs:label "R7 — Wasiat cakap hukum ke notaris"@id ;
-    rdfs:comment "Jika jenis=wasiat dan pemberi cakap hukum maka ke notaris dengan akta wasiat."@id ;
-    swrl:body (
-        [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_wasiat ]
-        [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :cakapHukum ; swrl:argument1 :var_k ; swrl:argument2 true ]
-    ) ;
-    swrl:head (
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :ditanganiOleh ; swrl:argument1 :var_k ; swrl:argument2 :lem_notaris ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :butuhAkta ; swrl:argument1 :var_k ; swrl:argument2 :akta_wasiat ]
-    ) .
+###  R4
+[ a swrl:Imp ;
+    rdfs:label "R4 - Hibah tanah ke PPAT dengan BPHTB"@id ;
+    rdfs:comment "Jika jenis hibah dan objek tanahSHM, maka ke PPAT dengan akta hibah dan kena BPHTB."@id ;
+    swrl:body [ a swrl:AtomList ;
+          rdf:first [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_hibah ] ;
+                      rdf:rest [ a swrl:AtomList ;
+                                  rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaObjek ; swrl:argument1 :var_k ; swrl:argument2 :obj_tanahSHM ] ;
+                                  rdf:rest rdf:nil ] ] ] ;
+    swrl:head [ a swrl:AtomList ;
+          rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :ditanganiOleh ; swrl:argument1 :var_k ; swrl:argument2 :lem_ppat ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :butuhAkta ; swrl:argument1 :var_k ; swrl:argument2 :akta_hibah ] ;
+                      rdf:rest [ a swrl:AtomList ;
+                                  rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :dikenaiBiaya ; swrl:argument1 :var_k ; swrl:argument2 :biaya_BPHTB ] ;
+                                  rdf:rest rdf:nil ] ] ] ] .
 
-:rule_R8 a swrl:Imp ;
-    rdfs:label "R8 — Atur harta kawin sepakat ke notaris"@id ;
-    rdfs:comment "Jika jenis=kawinHarta dan cakap hukum dan pasangan sepakat maka ke notaris dengan akta perjanjian kawin."@id ;
-    swrl:body (
-        [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_kawinHarta ]
-        [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :cakapHukum ; swrl:argument1 :var_k ; swrl:argument2 true ]
-        [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :adaSepakat ; swrl:argument1 :var_k ; swrl:argument2 true ]
-    ) ;
-    swrl:head (
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :ditanganiOleh ; swrl:argument1 :var_k ; swrl:argument2 :lem_notaris ]
-        [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :butuhAkta ; swrl:argument1 :var_k ; swrl:argument2 :akta_kawin ]
-    ) .
 
+###  R5
+[ a swrl:Imp ;
+    rdfs:label "R5 - Usaha satu pendiri modal kecil ke PT perorangan"@id ;
+    rdfs:comment "Jika jenis dirikanUsaha dengan satu pendiri dan modal kecil, maka ke PT perorangan lewat AHU."@id ;
+    swrl:body [ a swrl:AtomList ;
+          rdf:first [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_dirikanUsaha ] ;
+                      rdf:rest [ a swrl:AtomList ;
+                                  rdf:first [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :jumlahPendiri ; swrl:argument1 :var_k ; swrl:argument2 1 ] ;
+                                  rdf:rest [ a swrl:AtomList ;
+                                              rdf:first [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :modalKecil ; swrl:argument1 :var_k ; swrl:argument2 true ] ;
+                                              rdf:rest rdf:nil ] ] ] ] ;
+    swrl:head [ a swrl:AtomList ;
+          rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :butuhAkta ; swrl:argument1 :var_k ; swrl:argument2 :akta_PTperorangan ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :ditanganiOleh ; swrl:argument1 :var_k ; swrl:argument2 :lem_ahu ] ;
+                      rdf:rest rdf:nil ] ] ] .
+
+
+###  R6
+[ a swrl:Imp ;
+    rdfs:label "R6 - Utang jaminan kendaraan ke notaris fidusia"@id ;
+    rdfs:comment "Jika jenis utangJaminan dan objek kendaraan, maka ke notaris dengan akta fidusia."@id ;
+    swrl:body [ a swrl:AtomList ;
+          rdf:first [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_utangJaminan ] ;
+                      rdf:rest [ a swrl:AtomList ;
+                                  rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaObjek ; swrl:argument1 :var_k ; swrl:argument2 :obj_kendaraan ] ;
+                                  rdf:rest rdf:nil ] ] ] ;
+    swrl:head [ a swrl:AtomList ;
+          rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :ditanganiOleh ; swrl:argument1 :var_k ; swrl:argument2 :lem_notaris ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :butuhAkta ; swrl:argument1 :var_k ; swrl:argument2 :akta_fidusia ] ;
+                      rdf:rest rdf:nil ] ] ] .
+
+
+###  R7
+[ a swrl:Imp ;
+    rdfs:label "R7 - Wasiat cakap hukum ke notaris"@id ;
+    rdfs:comment "Jika jenis wasiat dan pemberi cakap hukum, maka ke notaris dengan akta wasiat."@id ;
+    swrl:body [ a swrl:AtomList ;
+          rdf:first [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_wasiat ] ;
+                      rdf:rest [ a swrl:AtomList ;
+                                  rdf:first [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :cakapHukum ; swrl:argument1 :var_k ; swrl:argument2 true ] ;
+                                  rdf:rest rdf:nil ] ] ] ;
+    swrl:head [ a swrl:AtomList ;
+          rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :ditanganiOleh ; swrl:argument1 :var_k ; swrl:argument2 :lem_notaris ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :butuhAkta ; swrl:argument1 :var_k ; swrl:argument2 :akta_wasiat ] ;
+                      rdf:rest rdf:nil ] ] ] .
+
+
+###  R8
+[ a swrl:Imp ;
+    rdfs:label "R8 - Atur harta kawin sepakat ke notaris"@id ;
+    rdfs:comment "Jika jenis kawinHarta, cakap hukum, dan pasangan sepakat, maka ke notaris dengan akta perjanjian kawin."@id ;
+    swrl:body [ a swrl:AtomList ;
+          rdf:first [ a swrl:ClassAtom ; swrl:classPredicate :KasusTriage ; swrl:argument1 :var_k ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :punyaJenis ; swrl:argument1 :var_k ; swrl:argument2 :trans_kawinHarta ] ;
+                      rdf:rest [ a swrl:AtomList ;
+                                  rdf:first [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :cakapHukum ; swrl:argument1 :var_k ; swrl:argument2 true ] ;
+                                  rdf:rest [ a swrl:AtomList ;
+                                              rdf:first [ a swrl:DatavaluedPropertyAtom ; swrl:propertyPredicate :adaSepakat ; swrl:argument1 :var_k ; swrl:argument2 true ] ;
+                                              rdf:rest rdf:nil ] ] ] ] ;
+    swrl:head [ a swrl:AtomList ;
+          rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :ditanganiOleh ; swrl:argument1 :var_k ; swrl:argument2 :lem_notaris ] ;
+          rdf:rest [ a swrl:AtomList ;
+                      rdf:first [ a swrl:IndividualPropertyAtom ; swrl:propertyPredicate :butuhAkta ; swrl:argument1 :var_k ; swrl:argument2 :akta_kawin ] ;
+                      rdf:rest rdf:nil ] ] ] .
+
+
+###  variabel
 :var_k a swrl:Variable ;
     rdfs:label "kasus"@id .
 
 
 #################################################################
-#    General axioms
+#    General axioms (disjointness)
+#    Slide Ontology Engineering: "Don't forget disjointness."
+#    Hanya kelas sekategori yang dibuat saling lepas.
 #################################################################
 
 [ rdf:type owl:AllDisjointClasses ;
@@ -1283,8 +706,5 @@ swrl:propertyPredicate rdf:type owl:AnnotationProperty .
   owl:members ( :PejabatNotaris
                 :PejabatPPAT
                 :SaksiAkta
-                :WargaAwam
               )
 ] .
-
-###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi
