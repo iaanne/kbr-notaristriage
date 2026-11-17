@@ -1,0 +1,9 @@
+﻿prefix,IRI,dipakai untuk
+proyek,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#,"T-Box: kelas, properti, aturan, satu individu nominal"
+data,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage/data#,A-Box: 79 individu aplikasi
+uji,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage/uji#,Berkas uji penalaran: 2 individu
+lkif,http://www.estrellaproject.org/lkif-core/,10 modul LKIF-Core yang diimpor
+swrl,http://www.w3.org/2003/11/swrl#,Aturan R1-R8
+xsd,http://www.w3.org/2001/XMLSchema#,"Tipe data boolean, integer, string"
+owl,http://www.w3.org/2002/07/owl#,Kosakata OWL 2
+rdfs,http://www.w3.org/2000/01/rdf-schema#,"Label, komentar, subclass"

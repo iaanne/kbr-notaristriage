@@ -1,170 +1,233 @@
-# Demo triase Notaris/PPAT untuk pengguna awam.
-# Prinsip: setiap jawaban diambil dari ontology via SPARQL, bukan karangan.
-# Alur: isi slot sampai lengkap, lalu tutup dengan ceklis siap print.
+# Demo triase Notaris/PPAT untuk pengguna awam (penampil).
+#
+# Peran berkas ini: menampilkan hasil. Penalaran OWL dan SWRL dijalankan
+# Pellet di dalam Protege, bukan di Python. Karena itu demo tidak menalar:
+# ia membaca ontology via SPARQL, lalu memaparkan.
+#
+# Tidak ada daftar kata kunci, daftar kasus, maupun daftar slot yang ditulis
+# di sini. Kata kunci kasus dibaca dari anotasi :kataKunci di A-Box
+# (data/abox.ttl), dan pertanyaan slot dibaca dari badan aturan swrl:Imp.
+#
 # Jalankan: python3 app.py  (CLI)  |  python3 app.py --test  (uji skenario)
 # Opsional Streamlit: streamlit run app_streamlit.py
-import re, sys
+import sys
 from pathlib import Path
 
+AKAR = Path(__file__).resolve().parent.parent
+if str(AKAR) not in sys.path:
+    sys.path.insert(0, str(AKAR))
+
 try:
-    from rdflib import Graph
+    from rdflib import URIRef
+    from notaris.ontology import (
+        NS,
+        label,
+        muat_aturan,
+        muat_ontology,
+        nama_lokal,
+        slot_dari_aturan,
+    )
+    from notaris.verbalisasi import PERTANYAAN_SLOT
 except ImportError:
     print("Butuh rdflib: pip install --break-system-packages rdflib")
     sys.exit(1)
 
-BASE = Path(__file__).resolve().parent
-ONTO = BASE.parent / "ontology" / "notaris-triage.ttl"
+g = muat_ontology()          # T-Box (skema + aturan) dan A-Box (individu)
+ATURAN = muat_aturan(g)      # R1..R8, dibaca dari ontology
 
-g = Graph()
-g.parse(str(ONTO), format="turtle")
 
-def q1(sparql):
+def q(sparql):
     return list(g.query(sparql))
 
-def ground_case(case_iri):
-    """Ambil fakta ground-truth satu kasus dari ontology."""
-    short = case_iri.split("#")[-1]
+
+# --- Deteksi keperluan: baca :kataKunci tiap kasus dari A-Box --------------
+
+def kandidat_kasus():
+    """Semua kasus triase beserta label, prioritas, dan kata kuncinya."""
+    Q = """
+    PREFIX : <http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    SELECT ?kasus ?label ?prioritas ?kunci WHERE {
+      ?kasus a :KasusTriage ; rdfs:label ?label .
+      OPTIONAL { ?kasus :prioritas ?prioritas . }
+      OPTIONAL { ?kasus :kataKunci ?kunci . }
+    }"""
+    hasil = {}
+    for kasus, lab, pri, kunci in q(Q):
+        d = hasil.setdefault(str(kasus), {"label": str(lab), "prioritas": 0, "kunci": []})
+        if pri is not None:
+            d["prioritas"] = int(pri)
+        if kunci is not None:
+            d["kunci"].append(str(kunci).lower())
+    return hasil
+
+
+def deteksi(cerita):
+    """Kasus dengan kata kunci paling banyak cocok; seri diputus :prioritas."""
+    teks = cerita.lower()
+    skor = []
+    for iri, d in kandidat_kasus().items():
+        cocok = sum(1 for k in d["kunci"] if k and k in teks)
+        if cocok:
+            skor.append((cocok, d["prioritas"], iri))
+    if not skor:
+        return None
+    skor.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
+    return skor[0][2]
+
+
+# --- Fakta kasus dari A-Box -------------------------------------------------
+
+def ground_case(iri):
+    """Fakta ground-truth satu kasus: instansi, akta, status, dokumen, saran."""
     Q = f"""
     PREFIX : <http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     SELECT ?lembaga ?akta ?status ?saran ?waktu ?biaya WHERE {{
-      :{short} :ditanganiOleh ?l ; :butuhAkta ?a ; :berstatus ?s ; :saranLangkah ?saran .
+      <{iri}> :ditanganiOleh ?l ; :butuhAkta ?a ; :berstatus ?s ; :saranLangkah ?saran .
       ?l rdfs:label ?lembaga . ?a rdfs:label ?akta . ?s rdfs:label ?status .
-      OPTIONAL {{ :{short} :perkiraanWaktu ?waktu . }}
-      OPTIONAL {{ :{short} :perkiraanBiaya ?biaya . }}
+      OPTIONAL {{ <{iri}> :perkiraanWaktu ?waktu . }}
+      OPTIONAL {{ <{iri}> :perkiraanBiaya ?biaya . }}
     }}"""
-    rows = q1(Q)
-    docs_q = f"""
-    PREFIX : <http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#>
-    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    SELECT ?d WHERE {{ :{short} :butuhDokumen ?x . ?x rdfs:label ?d . }}"""
-    docs = sorted({str(r[0]) for r in q1(docs_q)})
+    rows = q(Q)
     if not rows:
         return None
+
+    def teks_dokumen(predikat):
+        D = f"""
+        PREFIX : <http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT ?d WHERE {{ <{iri}> :{predikat} ?x . ?x rdfs:label ?d . }}"""
+        return sorted({str(r[0]) for r in q(D)})
+
+    dasar = sorted({
+        str(r[0]) for r in q(f"""
+        PREFIX : <http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT ?sumber WHERE {{
+          {{ <{iri}> :dasarKasus ?x . ?x :sumber ?sumber . }}
+          UNION
+          {{ <{iri}> :butuhAkta ?a . ?a :berdasarPada ?x . ?x :sumber ?sumber . }}
+        }}""")
+    })
+
+    sudah = teks_dokumen("sudahPunyaDokumen")
+    butuh = teks_dokumen("butuhDokumen")
+
     r = rows[0]
-    return {"lembaga": str(r[0]), "akta": str(r[1]), "status": str(r[2]),
-            "saran": str(r[3]), "waktu": str(r[4] or "-"), "biaya": str(r[5] or "-"),
-            "dokumen": docs}
+    return {
+        "iri": iri,
+        "label": label(g, URIRef(iri)),
+        "lembaga": str(r[0]),
+        "akta": str(r[1]),
+        "status": str(r[2]),
+        "saran": str(r[3]),
+        "waktu": str(r[4] or "-"),
+        "biaya": str(r[5] or "-"),
+        "sudah": sudah,
+        "kurang": [d for d in butuh if d not in sudah],
+        "dasar": dasar,
+    }
 
-# --- Deteksi keperluan dari bahasa sehari-hari (keyword, bisa diganti NLP/LLM) ---
-POLA = [
-    ("waris_sengketa", ["ribut", "tidak setuju", "tidak sepakat", "sengketa", "rebutan", "beda agama", "menolak"]),
-    ("waris_jual", ["waris", "warisan", "ahli waris", "peninggalan", "balik nama waris", "belum balik nama"]),
-    ("hibah", ["hibah", "kasih ke anak", "pemberian cuma", "hadiah tanah"]),
-    ("usaha", ["usaha", "pt perorangan", "pt biasa", " cv", "bikin pt", "dirikan", "umkm", "badan usaha"]),
-    ("fidusia", ["utang", "pinjam", "jaminan", "fidusia", "bpkb", "jaminan motor", "kredit"]),
-    ("wasiat", ["wasiat", "pesan terakhir", "meninggal nanti", "tidak rebutan"]),
-    ("kawin", ["kawin", "nikah", "pisah harta", "harta bersama", "perjanjian kawin", "pra-nikah"]),
-    ("jualbeli", ["jual", "beli", "ajb", "balik nama", "shm", "sertifikat", "tanah"]),
-]
 
-CASE_IRI = {
-    "jualbeli": "kasus_jualbeli_shm",
-    "waris_jual": "kasus_waris_belumSKW",
-    "waris_sengketa": "kasus_waris_sengketa",
-    "hibah": "kasus_hibah_tanah",
-    "usaha_pt": "kasus_ptperorangan",
-    "usaha_cv": "kasus_cv",
-    "fidusia": "kasus_fidusia_motor",
-    "wasiat": "kasus_wasiat",
-    "kawin": "kasus_kawin",
-}
+# --- Slot pertanyaan dari badan aturan SWRL --------------------------------
 
-# Slot yang harus diisi per keperluan (slot-filling sampai tuntas)
-SLOTS = {
-    "jualbeli": [("sertifikat", "Apakah sertifikat (SHM/HGB) sudah atas nama penjual? (sudah/belum)"),
-                  ("sepakat", "Apakah penjual-pembeli dan pasangan masing-masing sudah sepakat harga? (sudah/belum)"),
-                  ("dok", "Apakah KTP, KK, PBB lunas, dan SHM asli sudah di tangan? (sudah/belum)")],
-    "waris_jual": [("skw", "Apakah Surat Keterangan Waris (SKW) sudah ada? (sudah/belum)"),
-                   ("sepakat", "Apakah SEMUA ahli waris setuju dijual? (sudah/belum)"),
-                   ("sertifikat", "Apakah sertifikat tanahnya ada? (sudah/belum)")],
-    "waris_sengketa": [("sepakat", "Apakah semua ahli waris sepakat? (sudah/belum)")],
-    "hibah": [("sertifikat", "Apakah SHM atas nama pemberi hibah? (sudah/belum)"),
-              ("hubungan", "Apakah penerima masih keluarga (anak/pasangan)? (ya/bukan)")],
-    "usaha_pt": [("pendiri", "Berapa orang pendirinya? (1/2+)"),
-                 ("modal", "Apakah modal kecil/UMKM? (ya/tidak)")],
-    "usaha_cv": [("pendiri", "Berapa orang sekutunya? (tulis angka)")],
-    "fidusia": [("bpkb", "Apakah BPKB/faktur ada? (sudah/belum)"),
-                ("utang", "Apakah ada perjanjian utang pokoknya? (sudah/belum)")],
-    "wasiat": [("sehat", "Apakah pemberi wasiat sehat jasmani dan cakap hukum? (ya/tidak)"),
-               ("saksi", "Apakah ada 2 saksi yang bisa hadir? (sudah/belum)")],
-    "kawin": [("nikah", "Sudah menikah atau baru rencana? (sudah/rencana)"),
-              ("sepakat", "Apakah pasangan sepakat pisah harta? (sudah/belum)")],
-}
+def aturan_untuk(iri):
+    """Aturan yang badannya menyebut jenis keperluan kasus ini."""
+    jenis = g.value(URIRef(iri), NS.punyaJenis)
+    if jenis is None:
+        return None
+    for aturan in ATURAN.values():
+        for atom in aturan.body:
+            if atom.predikat == NS.punyaJenis and atom.argumen2 == jenis:
+                return aturan
+    return None
 
-def deteksi(cerita):
-    t = cerita.lower()
-    # sengketa didahulukan agar tidak ketelan waris_jual
-    for key, kws in POLA:
-        for kw in kws:
-            if kw in t:
-                if key == "waris_sengketa":
-                    return "waris_sengketa"
-                if key == "waris_jual":
-                    return "waris_jual"
-                if key == "usaha":
-                    # bedakan PT perorangan vs CV dari jumlah pendiri nanti; default tanya
-                    if "perorangan" in t or "sendiri" in t or "seorang" in t:
-                        return "usaha_pt"
-                    if " berdua" in t or " cv" in t or "dua orang" in t:
-                        return "usaha_cv"
-                    return "usaha_pt"  # default, dikoreksi saat slot pendiri diisi
-                return key
-    return None  # tak dikenali -> jangan asal jawab, tanya ulang (lihat main())
 
-def sapa_awal(need, info):
-    judul = {"jualbeli": "jual-beli tanah", "waris_jual": "jual tanah warisan",
-             "waris_sengketa": "bagi waris bersengketa", "hibah": "hibah tanah",
-             "usaha_pt": "dirikan PT perorangan", "usaha_cv": "dirikan CV",
-             "fidusia": "utang dengan jaminan", "wasiat": "buat wasiat",
-             "kawin": "atur harta kawin"}.get(need, need)
-    print(f"\nKebutuhan tercatat: {judul}.")
-    print("Alur: cek syarat > ceklis dokumen > instansi dan akta > langkah berikutnya.")
-    print("Jawab singkat (sudah/belum/ya/tidak/angka). Ketik 'batal' untuk berhenti.\n")
+def slot_untuk(iri):
+    """Slot yang harus dijawab pengguna, dibaca dari swrl:body."""
+    aturan = aturan_untuk(iri)
+    if aturan is None:
+        return []
+    return [
+        (nama, PERTANYAAN_SLOT.get(nama, f"Pertanyaan untuk {nama}?"))
+        for nama in slot_dari_aturan(aturan, g)
+    ]
 
-def tanya_slot(need, jawaban_awal=None):
-    data = dict(jawaban_awal or {})
-    slots = SLOTS[need]
-    # izinkan koreksi usaha_pt -> usaha_cv bila pendiri >= 2
-    for key, pertanyaan in slots:
-        if key in data:
-            continue
-        print("BOT:", pertanyaan)
+
+def _kunci(nilai):
+    """Kunci pembanding netral: bool, angka, atau teks huruf kecil."""
+    if isinstance(nilai, bool):
+        return ("bool", nilai)
+    s = str(nilai).strip().lower()
+    if s in ("true", "ya", "sudah", "ada"):
+        return ("bool", True)
+    if s in ("false", "tidak", "belum"):
+        return ("bool", False)
+    try:
+        return ("num", int(s))
+    except ValueError:
+        return ("str", s)
+
+
+def selaras(iri, jawaban):
+    """Pilih ulang kasus sejenis yang faktanya paling cocok dengan jawaban.
+
+    Bukan penalaran DL, hanya pencocokan fakta yang sudah diassert, supaya
+    demo tidak menampilkan kasus yang bertentangan dengan jawaban pengguna.
+    """
+    jenis = g.value(URIRef(iri), NS.punyaJenis)
+    kandidat = list(g.subjects(NS.punyaJenis, jenis)) if jenis is not None else []
+    if len(kandidat) <= 1:
+        return URIRef(iri)
+
+    def skor(k):
+        s = 0
+        for nama, val in jawaban.items():
+            nyata = g.value(k, NS[nama])
+            if nyata is None:
+                continue
+            s += 1 if _kunci(nyata) == _kunci(val) else -1
+        return s
+
+    return max(kandidat, key=lambda k: (skor(k), str(k)))
+
+
+# --- Alur interaktif --------------------------------------------------------
+
+def tanya_slot(iri):
+    data = {}
+    for nama, pertanyaan in slot_untuk(iri):
+        print("BOT:", pertanyaan, "(sudah/belum, ya/tidak, atau angka)")
         j = input("Anda: ").strip().lower()
         if j == "batal":
             return None
-        data[key] = j
-        if need == "usaha_pt" and key == "pendiri" and j.strip().startswith("2"):
-            print("BOT: Pendiri 2 orang atau lebih, dialihkan ke jalur CV/PT biasa.")
-            return {"__alih__": "usaha_cv", **data}
+        data[nama] = j
     return data
 
-def putusan(need, data):
-    """Terapkan logika SWRL secara ringkas (mirror dari ontology) + grounding SPARQL."""
-    # Aturan sengketa: tidak sepakat -> pengadilan
-    sepakat = (data.get("sepakat") or "")
-    if need in ("waris_jual", "waris_sengketa") and sepakat.startswith(("belum", "tidak", "t")) and "sudah" not in sepakat and "ya" not in sepakat:
-        need = "waris_sengketa"
-    iri = CASE_IRI[need]
-    info = ground_case(iri)
-    return need, info
 
-def cetak_tuntas(need, data, info):
+def cetak_hasil(info):
     print("\n----- HASIL TRIASE -----")
-    print(f"Keperluan   : {need}")
+    print(f"Keperluan   : {info['label']}")
     print(f"Instansi    : {info['lembaga']}")
     print(f"Akta/surat  : {info['akta']}")
     print(f"Status      : {info['status']}")
-    print("Dokumen yang harus disiapkan:")
-    for d in info["dokumen"]:
+    print("Dokumen yang sudah ada:")
+    for d in info["sudah"] or ["(belum ada data)"]:
         print(f"  - {d}")
-    print(f"Jawaban Anda: {data}")
+    print("Dokumen yang masih kurang:")
+    for d in info["kurang"] or ["(tidak ada)"]:
+        print(f"  - {d}")
     print(f"Langkah berikutnya: {info['saran']}")
     print(f"Perkiraan waktu : {info['waktu']}")
     print(f"Perkiraan biaya : {info['biaya']}")
-    print("Dasar hukum (umum, konfirmasi ke pejabat): UUJN No.2/2014; aturan PPAT; KUHPerdata/KHI untuk waris; UU Fidusia/PT/Perkawinan sesuai kasus.")
+    if info["dasar"]:
+        print("Dasar hukum:")
+        for s in info["dasar"]:
+            print(f"  - {s}")
     print("Catatan: ini arahan awal, bukan pengganti Notaris/PPAT. Bawa ceklis ini saat datang.")
     print("------------------------\n")
+
 
 def main():
     print("Layanan triase Notaris/PPAT.")
@@ -173,65 +236,69 @@ def main():
     if not cerita:
         print("BOT: Cerita kosong. Ulangi.")
         return
-    need = deteksi(cerita)
-    if need is None:
+    iri = deteksi(cerita)
+    if iri is None:
         print("BOT: Keperluan belum dikenali. Ceritakan ulang dengan kata yang lebih umum.")
         print("     Contoh: 'mau jual tanah', 'warisan belum balik nama', 'mau bikin PT'.")
         return
-    if need == "usaha_pt":
-        print("BOT: Untuk usaha, pastikan dulu jumlah pendirinya.")
-    sapa_awal(need, None)
-    data = tanya_slot(need)
+    print(f"\nKebutuhan tercatat: {kandidat_kasus()[iri]['label']}.")
+    if not slot_untuk(iri):
+        print("BOT: Tidak ada pertanyaan tambahan untuk keperluan ini.\n")
+    data = tanya_slot(iri)
     if data is None:
         print("BOT: Sesi dibatalkan.")
         return
-    if "__alih__" in data:
-        need = data.pop("__alih__")
-        sapa_awal(need, None)
-        data2 = tanya_slot(need, data)
-        if data2 is None:
-            return
-        data = data2
-    need_fix, info = putusan(need, data)
+    iri = selaras(iri, data)
+    info = ground_case(iri)
     if info is None:
         print("BOT: Data tidak ditemukan di ontology. Ceritakan ulang.")
         return
-    cetak_tuntas(need_fix, data, info)
+    cetak_hasil(info)
     print("BOT: Ada yang kurang jelas? (tulis pertanyaan / 'selesai')")
     while True:
         j = input("Anda: ").strip().lower()
-        if j in ("selesai", "cukup", "tidak", "ok"):
+        if j in ("selesai", "cukup", "tidak", "ok", ""):
             print("BOT: Sesi selesai. Simpan hasil di atas untuk dibawa ke pejabat.")
             break
         print("BOT: Patokannya tetap ceklis di atas. Bawa dokumennya, tanyakan ke pejabat yang tercantum. ('selesai' untuk tutup)")
 
+
 def test():
-    cases = [
-        ("mau jual tanah shm", "jualbeli"),
-        ("mau jual tanah warisan belum balik nama", "waris_jual"),
-        ("ahli waris ribut tidak sepakat", "waris_sengketa"),
-        ("mau hibah tanah ke anak", "hibah"),
-        ("mau bikin pt perorangan sendiri", "usaha_pt"),
-        ("utang jaminan motor bpkb", "fidusia"),
-        ("mau buat wasiat", "wasiat"),
-        ("mau perjanjian pisah harta nikah", "kawin"),
+    kasus = [
+        ("mau jual tanah shm", "kasus_jualbeli_shm"),
+        ("mau jual tanah warisan belum balik nama", "kasus_waris_belumSKW"),
+        ("ahli waris ribut tidak sepakat", "kasus_waris_sengketa"),
+        ("mau hibah tanah ke anak", "kasus_hibah_tanah"),
+        ("mau bikin pt perorangan sendiri", "kasus_ptperorangan"),
+        ("mau dirikan cv berdua", "kasus_cv"),
+        ("utang jaminan motor bpkb", "kasus_fidusia_motor"),
+        ("mau buat wasiat", "kasus_wasiat"),
+        ("mau perjanjian pisah harta nikah", "kasus_kawin"),
     ]
     ok = 0
-    for cerita, harap in cases:
+    for cerita, harap in kasus:
         got = deteksi(cerita)
-        info = ground_case(CASE_IRI.get(got, "kasus_jualbeli_shm"))
-        lolos = (got == harap) and (info is not None)
-        print(f"[{'OK' if lolos else 'FAIL'}] '{cerita}' -> {got} (harap {harap}) | {info['lembaga']} / {info['akta']}" if info else "no info")
+        nama = nama_lokal(got) if got else None
+        info = ground_case(got) if got else None
+        lolos = (nama == harap) and (info is not None)
+        n_slot = len(slot_untuk(got)) if got else 0
+        baris = (f"[{'OK' if lolos else 'FAIL'}] '{cerita}' -> {nama} "
+                 f"(harap {harap}) | {n_slot} slot")
+        if info:
+            baris += f" | {info['lembaga']} / {info['akta']}"
+        print(baris)
         ok += lolos
-    print(f"\n{ok}/{len(cases)} deteksi + grounding lolos.")
-    # uji CQ count
+    print(f"\n{ok}/{len(kasus)} deteksi + grounding lolos.")
+
     print("Uji 10 CQ:", end=" ")
     import glob
     n = 0
-    for f in sorted(glob.glob(str(BASE.parent / 'queries' / '*.rq'))):
-        if list(g.query(open(f, encoding='utf-8').read())):
+    berkas = sorted(glob.glob(str(AKAR / "queries" / "*.rq")))
+    for f in berkas:
+        if list(g.query(open(f, encoding="utf-8").read())):
             n += 1
-    print(f"{n}/10 query mengembalikan baris.")
+    print(f"{n}/{len(berkas)} query mengembalikan baris.")
+
 
 if __name__ == "__main__":
     if "--test" in sys.argv:

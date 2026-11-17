@@ -1,0 +1,49 @@
+﻿nama,IRI kita,DBpedia EN,id.dbpedia,status,catatan
+AhliWaris,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AhliWaris,dbr:Heir,,terverifikasi (resource),"konsep umum, bukan istilah hukum Indonesia"
+Akta,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#Akta,dbr:Deed,,terverifikasi (resource),
+AktaBagiWaris,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaBagiWaris,,,tidak ada padanan,khas Indonesia (APHB)
+AktaCV,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaCV,dbr:Limited_partnership,,terverifikasi (resource),
+AktaFidusia,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaFidusia,dbr:Fiduciary,id:Jaminan_fidusia,terverifikasi (sameAs),
+AktaHakTanggungan,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaHakTanggungan,dbr:Mortgage_law,,terverifikasi (resource),"konsep jaminan tanah, bukan nama UUHT"
+AktaHibahTanah,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaHibahTanah,dbr:Gift_(law),,terverifikasi (resource),
+AktaJaminan,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaJaminan,dbr:Mortgage_law,,perkiraan,"kelas umum, padanan lebih sempit"
+AktaJualBeli,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaJualBeli,dbr:Conveyancing,,terverifikasi (resource),"proses pemindahan hak, bukan aktanya"
+AktaPTBiasa,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaPTBiasa,dbr:Limited_liability_company,,terverifikasi (resource),
+AktaPTPerorangan,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaPTPerorangan,dbr:Limited_liability_company,,terverifikasi (resource),
+AktaPerjanjianKawin,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaPerjanjianKawin,dbr:Prenuptial_agreement,,terverifikasi (resource),
+AktaUsaha,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaUsaha,dbr:Company_registry,,perkiraan,"registri perusahaan, bukan akta"
+AktaWasiat,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AktaWasiat,dbr:Will_and_testament,id:Surat_wasiat,terverifikasi (sameAs),
+AturanHukum,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#AturanHukum,dbr:Law,,terverifikasi (resource),
+CeritaAwam,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#CeritaAwam,,,tidak ada padanan,konsep spesifik proyek
+DokumenSyarat,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#DokumenSyarat,dbr:Legal_document,,terverifikasi (resource),
+JenisTransaksi,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#JenisTransaksi,dbr:Transaction,,terverifikasi (resource),
+KasusTriage,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#KasusTriage,,,tidak ada padanan,konsep spesifik proyek
+KasusWarisJual,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#KasusWarisJual,,,tidak ada padanan,kelas baru SROIQ(D)
+KomponenBiaya,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#KomponenBiaya,dbr:Fee,,perkiraan,biaya umum
+Lembaga,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#Lembaga,dbr:Government_agency,,terverifikasi (resource),
+ObjekHukum,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#ObjekHukum,dbr:Property,,perkiraan,ambigu: properti vs harta
+PejabatNotaris,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#PejabatNotaris,dbr:Notary_public,id:Notaris,terverifikasi (sameAs),sameAs lewat dbr:Notary
+PejabatPPAT,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#PejabatPPAT,dbr:Land_registration,,perkiraan,"proses pendaftaran tanah, bukan pejabat"
+PeraturanPemerintah,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#PeraturanPemerintah,dbr:Government_regulation,,terverifikasi (resource),
+PeristiwaHukum,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#PeristiwaHukum,,,tidak ada padanan,dbr:Legal_event tidak ada
+SaksiAkta,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#SaksiAkta,,,belum diperiksa,
+StatusPenanganan,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#StatusPenanganan,,,tidak ada padanan,konsep spesifik proyek
+SuratKuasaMembebankan,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#SuratKuasaMembebankan,dbr:Power_of_attorney,id:Surat_kuasa,terverifikasi (sameAs),
+SuratWaris,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#SuratWaris,,,tidak ada padanan,dbr:Certificate_of_inheritance tidak ada
+Tokoh,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#Tokoh,dbr:Person,,terverifikasi (resource),
+UndangUndang,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#UndangUndang,dbr:Statute,,terverifikasi (resource),
+WargaAwam,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#WargaAwam,dbr:Citizen,,terverifikasi (resource),
+lem_ahu,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#lem_ahu,dbr:Ministry_of_Law_and_Human_Rights_(Indonesia),,terverifikasi (resource),juga dbr:Company_registry
+lem_bpn,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#lem_bpn,,,tidak ada padanan,dbr:National_Land_Agency tidak ada
+lem_notaris,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#lem_notaris,dbr:Notary_public,id:Notaris,terverifikasi (sameAs),
+lem_ppat,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#lem_ppat,dbr:Land_registration,,perkiraan,"proses, bukan lembaga"
+lem_pengadilan,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#lem_pengadilan,,,belum diperiksa,
+aturan_fidusia,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_fidusia,dbr:Fiduciary,id:Jaminan_fidusia,perkiraan,"konsep, bukan teks UU"
+aturan_kawin,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_kawin,dbr:Marriage,id:Perkawinan,terverifikasi (sameAs),
+aturan_ppat,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_ppat,dbr:Land_registration,,perkiraan,
+aturan_pt,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_pt,dbr:Limited_liability_company,,terverifikasi (resource),
+aturan_tanah,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_tanah,dbr:Land_registration,,perkiraan,
+aturan_uuht,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_uuht,dbr:Mortgage_law,,terverifikasi (resource),
+aturan_uujn,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_uujn,dbr:Notary_public,,perkiraan,
+aturan_warisIslam,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_warisIslam,dbr:Sharia,,terverifikasi (resource),
+aturan_warisPerdata,http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aturan_warisPerdata,dbr:Inheritance,id:Hukum_waris,terverifikasi (sameAs),

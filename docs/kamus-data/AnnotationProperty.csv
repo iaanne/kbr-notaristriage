@@ -1,0 +1,4 @@
+﻿IRI,prefiks,label,komentar
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#kataKunci,:kataKunci,kata kunci,"Sinonim dan frasa pemicu pada bahasa awam. Dipakai demo untuk mencocokkan cerita ke kasus, sehingga daftar kata tidak lagi ditulis di kode."
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#prioritas,:prioritas,prioritas,Angka pemecah seri saat satu cerita cocok ke beberapa kasus. Angka lebih besar diperiksa lebih dulu.
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#sumber,:sumber,sumber,"Rujukan sumber hukum atau data, misalnya alamat peraturan.go.id."

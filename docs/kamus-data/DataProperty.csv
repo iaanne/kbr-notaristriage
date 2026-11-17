@@ -1,0 +1,11 @@
+﻿IRI,prefiks,label,domain,range,komentar
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#adaSKWaris,:adaSKWaris,ada surat waris,:KasusTriage,xsd:boolean,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#adaSepakat,:adaSepakat,ada kesepakatan semua pihak,:KasusTriage,xsd:boolean,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#adaSertifikat,:adaSertifikat,ada sertifikat,:KasusTriage,xsd:boolean,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#cakapHukum,:cakapHukum,cakap hukum,:KasusTriage,xsd:boolean,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#jumlahPendiri,:jumlahPendiri,jumlah pendiri,:KasusTriage,xsd:integer,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#modalKecil,:modalKecil,modal kecil (usaha mikro),:KasusTriage,xsd:boolean,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#penjelasanAwam,:penjelasanAwam,penjelasan awam,union (7 kelas),xsd:string,"Domain dibatasi union tujuh kelas yang memang punya penjelasan awam: tidak seumum owl:Thing, tidak sesempit satu kelas."
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#perkiraanBiaya,:perkiraanBiaya,perkiraan biaya,:KasusTriage,xsd:string,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#perkiraanWaktu,:perkiraanWaktu,perkiraan waktu,:KasusTriage,xsd:string,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#saranLangkah,:saranLangkah,saran langkah,:KasusTriage,xsd:string,

@@ -10,10 +10,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from rdflib import Graph, Namespace, URIRef
+from rdflib import BNode, Graph, Namespace, URIRef
 from rdflib.namespace import OWL, RDF, RDFS
 
-from . import TTL
+from . import ABOX, TTL
 
 NS = Namespace("http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#")
 SWRL = Namespace("http://www.w3.org/2003/11/swrl#")
@@ -22,10 +22,18 @@ SWRL = Namespace("http://www.w3.org/2003/11/swrl#")
 VAR_KASUS = NS.var_k
 
 
-def muat_ontology(jalur: str | Path = TTL) -> Graph:
-    """Parse file Turtle. One-shot per pemanggilan; cache di level pemanggil."""
+def muat_ontology(jalur: str | Path | None = None) -> Graph:
+    """Parse berkas Turtle menjadi satu graph.
+
+    Tanpa argumen, T-Box (skema dan aturan) dimuat bersama A-Box (individu),
+    supaya seluruh fakta proyek ada di satu graph. Kalau `jalur` diberikan,
+    hanya berkas itu yang dibaca. Modul LKIF tidak ikut dimuat: ia rujukan
+    kelas untuk Protégé, dan tidak dipakai query maupun verbalisasi.
+    """
     g = Graph()
-    g.parse(str(jalur), format="turtle")
+    berkas = (jalur,) if jalur is not None else (TTL, ABOX)
+    for b in berkas:
+        g.parse(str(b), format="turtle")
     return g
 
 
@@ -104,7 +112,7 @@ class Atom:
 class Aturan:
     """Satu `swrl:Imp` beserta body dan head-nya."""
 
-    iri: URIRef
+    iri: URIRef | BNode
     nama: str
     label: str
     comment: str
@@ -125,16 +133,31 @@ def _koleksi(g: Graph, node) -> list:
     return hasil
 
 
+def _nama_aturan(g: Graph, s) -> str:
+    """Nama pendek satu aturan.
+
+    Aturan SWRL disimpan sebagai node anonim supaya bisa dibaca OWL API dan
+    Pellet (aturan bernama tidak diparsing). Karena itu IRI-nya tidak ada.
+    Nama diambil dari kata pertama `rdfs:label`, misalnya "R2" dari
+    "R2 - Warisan tanpa SKW berarti belum lengkap".
+    """
+    lbl = str(g.value(s, RDFS.label) or "").strip()
+    if lbl:
+        return lbl.split(" ", 1)[0]
+    return nama_lokal(s)
+
+
 def muat_aturan(g: Graph) -> dict[str, Aturan]:
     """Semua `swrl:Imp` di graph, diurut berdasarkan nama R1..Rn."""
     aturan: dict[str, Aturan] = {}
     for s in g.subjects(RDF.type, SWRL.Imp):
         body = _koleksi(g, g.value(s, SWRL.body))
         head = _koleksi(g, g.value(s, SWRL.head))
-        aturan[nama_lokal(s)] = Aturan(
+        nama = _nama_aturan(g, s)
+        aturan[nama] = Aturan(
             iri=s,
-            nama=nama_lokal(s),
-            label=str(g.value(s, RDFS.label) or nama_lokal(s)),
+            nama=nama,
+            label=str(g.value(s, RDFS.label) or nama),
             comment=str(g.value(s, RDFS.comment) or ""),
             body=tuple(Atom.dari_node(g, n) for n in body),
             head=tuple(Atom.dari_node(g, n) for n in head),

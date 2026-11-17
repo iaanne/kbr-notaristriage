@@ -1,0 +1,16 @@
+﻿IRI,prefiks,label,domain,range,karakteristik,inverse of,subPropertyOf,propertyChainAxiom,komentar
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#aktaUntuk,:aktaUntuk,akta untuk,:Akta,:KasusTriage,,:butuhAkta,,,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#berdasarPada,:berdasarPada,berdasar pada,:Akta,:AturanHukum,,,,,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#berstatus,:berstatus,berstatus,:KasusTriage,:StatusPenanganan,Functional,,,,"Mengikuti slide reasoning: domain dan range dipilih sesempit yang benar, bukan owl:Thing. Functional karena satu kasus punya satu status aktif."
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#butuhAkta,:butuhAkta,butuh akta,:KasusTriage,:Akta,,,,,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#butuhDokumen,:butuhDokumen,butuh dokumen,:KasusTriage,:DokumenSyarat,,,,,Dokumen yang masih kurang dan harus disiapkan.
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dasarKasus,:dasarKasus,dasar kasus,:KasusTriage,:AturanHukum,,,,:butuhAkta o :berdasarPada,"Rantai properti (huruf R pada SROIQ): bila sebuah kasus butuh akta dan akta itu berdasar pada suatu aturan, maka aturan tersebut menjadi dasar kasus. Contoh: kasus butuh akta_PHB, akta_PHB berdasar aturan_ppat, maka dasarKasus kasus adalah aturan_ppat."
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#dikenaiBiaya,:dikenaiBiaya,dikenai biaya,:KasusTriage,:KomponenBiaya,,,,,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#ditanganiOleh,:ditanganiOleh,ditangani oleh,:KasusTriage,:Lembaga,Functional,:menangani,,,Satu kasus diarahkan ke satu lembaga. Functional supaya badge instansi di demo tunggal dan tidak rancu.
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#melibatkanTokoh,:melibatkanTokoh,melibatkan tokoh,:KasusTriage,:Tokoh,,,,,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#menangani,:menangani,menangani,:Lembaga,:KasusTriage,,,,,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#perluDaftarDi,:perluDaftarDi,perlu daftar di,:Akta,:Lembaga,,,,,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#punyaJenis,:punyaJenis,punya jenis keperluan,:KasusTriage,:JenisTransaksi,,,,,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#punyaObjek,:punyaObjek,punya objek,:KasusTriage,:ObjekHukum,,,,,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#sudahPunyaDokumen,:sudahPunyaDokumen,sudah punya dokumen,:KasusTriage,:DokumenSyarat,,,,,
+http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#terkaitAturan,:terkaitAturan,terkait aturan,:AturanHukum,:AturanHukum,Transitive,,,,"Contoh transitive: bila A terkait B dan B terkait C, maka A terkait C."

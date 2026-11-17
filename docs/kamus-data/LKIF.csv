@@ -1,0 +1,14 @@
+﻿modul,IRI resmi,berkas lokal,diimpor,lisensi,catatan
+action,http://www.estrellaproject.org/lkif-core/action.owl,ontology/external/lkif/action.ttl,ya,https://creativecommons.org/licenses/by/4.0/,
+expression,http://www.estrellaproject.org/lkif-core/expression.owl,ontology/external/lkif/expression.ttl,ya,https://creativecommons.org/licenses/by/4.0/,
+legal-action,http://www.estrellaproject.org/lkif-core/legal-action.owl,ontology/external/lkif/legal-action.ttl,ya,https://creativecommons.org/licenses/by/4.0/,
+legal-role,http://www.estrellaproject.org/lkif-core/legal-role.owl,ontology/external/lkif/legal-role.ttl,ya,https://creativecommons.org/licenses/by/4.0/,
+lkif-top,http://www.estrellaproject.org/lkif-core/lkif-top.owl,ontology/external/lkif/lkif-top.ttl,ya,https://creativecommons.org/licenses/by/4.0/,
+mereology,http://www.estrellaproject.org/lkif-core/mereology.owl,ontology/external/lkif/mereology.ttl,ya,https://creativecommons.org/licenses/by/4.0/,dipangkas: deklarasi transitive dibuang
+process,http://www.estrellaproject.org/lkif-core/process.owl,ontology/external/lkif/process.ttl,ya,https://creativecommons.org/licenses/by/4.0/,
+relative-places,http://www.estrellaproject.org/lkif-core/relative-places.owl,ontology/external/lkif/relative-places.ttl,ya,https://creativecommons.org/licenses/by/4.0/,dipangkas: deklarasi transitive dibuang
+role,http://www.estrellaproject.org/lkif-core/role.owl,ontology/external/lkif/role.ttl,ya,https://creativecommons.org/licenses/by/4.0/,
+time,http://www.estrellaproject.org/lkif-core/time.owl,ontology/external/lkif/time.ttl,ya,https://creativecommons.org/licenses/by/4.0/,dipangkas: deklarasi transitive dibuang
+lkif-core,http://www.estrellaproject.org/lkif-core/lkif-core.owl,ontology/external/lkif/lkif-core.ttl,tidak,https://creativecommons.org/licenses/by/4.0/,tidak diimpor: menarik norm.owl
+lkif-rules,http://www.estrellaproject.org/lkif-core/lkif-rules.owl,ontology/external/lkif/lkif-rules.ttl,tidak,https://creativecommons.org/licenses/by/4.0/,"tidak diimpor: kosakata bahasa aturan, tidak dipakai"
+norm,http://www.estrellaproject.org/lkif-core/norm.owl,ontology/external/lkif/norm.ttl,tidak,https://creativecommons.org/licenses/by/4.0/,tidak diimpor: Pellet gagal mengklasifikasi

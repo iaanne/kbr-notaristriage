@@ -9,10 +9,13 @@ from pathlib import Path
 #: Akar repo, satu tingkat di atas paket ini.
 AKAR = Path(__file__).resolve().parent.parent
 
-#: Ontology OWL DL sumber tunggal.
+#: T-Box: skema dan aturan SWRL, tanpa individu.
 TTL = AKAR / "ontology" / "notaris-triage.ttl"
 
-#: Berkas hasil generate. Turunan, bukan sumber kebenaran.
+#: A-Box: seluruh individu domain, dipisah dari skema.
+ABOX = AKAR / "data" / "abox.ttl"
+
+#: Folder data. Sebagian isinya hasil generate, bukan sumber kebenaran.
 DATA = AKAR / "data"
 
-__all__ = ["AKAR", "TTL", "DATA"]
+__all__ = ["AKAR", "TTL", "ABOX", "DATA"]
