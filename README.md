@@ -23,7 +23,8 @@ tools/       generator kamus data
 
 ## Prasyarat
 
-Python 3.10+ dengan `rdflib`, dan Protégé 5.6 beserta plugin Pellet untuk
+Python 3.10 atau lebih baru (diuji di 3.14) dengan `rdflib`, dan Protégé 5.6
+beserta plugin Pellet untuk
 penalaran serta inspeksi ontology. Streamlit hanya dibutuhkan untuk demo web.
 
 ## Instalasi
