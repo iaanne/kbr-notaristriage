@@ -8,6 +8,7 @@
 - `docs/TRACEABILITY.md` — pasal → ontology → rule → CQ.
 - `docs/SKEMA-BEDA.md` — bukti beda skema vs LexID/Loutas/B-Team3.
 - `docs/EVALUASI-CQ.md` — hasil uji aktual.
+- `docs/PROGRESS.md` — log progres mingguan untuk laporan dosen.
 - `demo/app.py` — chatbot CLI solution-oriented (slot-filling + grounding SPARQL
   + ceklis akhir). Bukan sekadar Q&A: menolak tutup sebelum slot lengkap.
 
