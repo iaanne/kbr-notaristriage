@@ -1,0 +1,10 @@
+﻿urutan,tahap,pekerjaan,status
+1,Cakupan dan metode,"Selaras slide KBR 3,4,5,7,8,0; metode Noy/McGuinness 10 langkah; lingkup tidak terlalu lanjut",selesai
+2,T-Box,"34 kelas, 15 object property, 10 data property, 3 AllDisjointClasses, 8 swrl:Imp",selesai
+3,A-Box,"79 individu aplikasi di data/abox.ttl, anotasi kataKunci dan prioritas",selesai
+4,Reuse LKIF-Core,10 modul diimpor satu per satu; norm.owl dibuang karena Pellet gagal,selesai
+5,Build fix Pellet,12 deklarasi owl:TransitiveProperty di LKIF dibuang agar IGNORE_UNSUPPORTED_AXIOMS=false lolos,selesai
+6,Verifikasi di GUI,kasus_uji_waris terbukti mendapat berstatus dan butuhDokumen dari R2 (latar kuning),selesai
+7,SROIQ(D),Nominal owl:hasValue pada KasusWarisJual dan rantai properti pada dasarKasus; terbukti headless dan di GUI Protégé,selesai
+8,Demo dan CQ,"9/9 deteksi, 10/10 CQ, verbalisasi 205 baris, tanpa hardcode di Python",selesai
+9,Kamus data,Spreadsheet kelas/relasi/IRI/referensi/DBpedia dan mind map,selesai

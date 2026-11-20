@@ -5,8 +5,16 @@ __pycache__/
 .venv/
 venv/
 
+# Hasil generate notaris/ (selalu bisa dibangun ulang dari .ttl)
+data/verbalized.jsonl
+
+# Rahasia
+.env
+
 # Streamlit
 .streamlit/
+!demo/.streamlit/
+!demo/.streamlit/config.toml
 
 # OS / editor
 .DS_Store
@@ -18,11 +26,16 @@ Thumbs.db
 *.bak
 *~
 
-# Protege
-catalog-v001.xml
-
 # Protege accidental saves
 v1.rdf
 v2.rdf
 # duplikat unduhan
 *(1).*
+
+# Transkrip chat Notaris Triage (data lokal, jangan commit)
+data/sesi/
+
+# Video penjelasan (artefak besar, simpan di luar repo)
+video-*.mp4
+# Duplikat kamus data di akar, sumbernya docs/kamus-data/
+/notaris-triage-kamus-data.xlsx

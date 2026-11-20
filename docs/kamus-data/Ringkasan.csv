@@ -1,0 +1,18 @@
+﻿ukuran,nilai,keterangan
+kelas (namespace proyek),34,termasuk KasusWarisJual
+object property,15,"1 punya owl:inverseOf ganda, 1 rantai properti"
+data property,10,"xsd:boolean, integer, string"
+annotation property,3,"kataKunci, prioritas, sumber"
+aturan SWRL,8,"R1-R8, node anonim"
+AllDisjointClasses,3,
+modul LKIF diimpor,10,norm.owl tidak diimpor
+individu A-Box,79,data/abox.ttl
+individu T-Box,1,"trans_warisJual, nominal SROIQ(D)"
+individu uji,2,"kasus_uji_waris, kasus_uji_rantai"
+individu unik gabungan,81,setelah duplikat dibuang
+triple T-Box,681,ontology/notaris-triage.ttl
+triple A-Box,541,data/abox.ttl
+triple uji,18,data/uji-penalaran.ttl
+triple gabungan,1238,ketiga berkas
+ekspresivitas DL,SROIQ(D),terukur dengan Pellet 2.2.0
+status Pellet,konsisten,"R2, rantai, dan nominal terbukti menurunkan fakta"

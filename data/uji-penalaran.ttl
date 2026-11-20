@@ -1,0 +1,40 @@
+@prefix : <http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage/uji> rdf:type owl:Ontology ;
+    owl:imports <http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage/data> ;
+    rdfs:comment "Berkas uji penalaran, terpisah dari A-Box aplikasi. Dua individu di sini sengaja tidak membawa hasil inferensi apa pun, sehingga Pellet harus menurunkannya dari fakta masukan. kasus_uji_waris menguji aturan R2 (berstatus dan butuhDokumen). kasus_uji_rantai menguji rantai properti :dasarKasus (turun ke aturan_ppat) dan nominal :KasusWarisJual. Buka berkas ini di Protégé, jalankan Pellet, lalu periksa kedua individu: semua hasil harus berlatar kuning (inferred), bukan assertion. Catatan waktu: karena nominal membuat Pellet mengklasifikasi seluruh A-Box yang diimpor, precompute atas A-Box penuh memakan sekitar tiga sampai empat menit."@id ;
+    rdfs:label "Notaris Triage, uji penalaran Pellet"@id .
+
+
+#################################################################
+#    Kasus uji: hanya fakta masukan
+#    R2 menurunkan berstatus belumLengkap dan butuhDokumen SKWaris.
+#################################################################
+
+:kasus_uji_waris rdf:type owl:NamedIndividual ,
+                        :KasusTriage ;
+               :adaSKWaris "false"^^xsd:boolean ;
+               :punyaJenis :trans_warisJual ;
+               :punyaObjek :obj_tanahWaris ;
+               rdfs:comment "Tidak ada berstatus, ditanganiOleh, butuhAkta, maupun butuhDokumen di sini. Semua itu harus datang dari Pellet."@id ;
+               rdfs:label "Kasus uji: waris tanpa SKW"@id .
+
+
+#################################################################
+#    Kasus uji rantai properti dan nominal
+#    Rantai :butuhAkta o :berdasarPada menurunkan :dasarKasus ke
+#    aturan_ppat, dan nominal :KasusWarisJual mengetikkan individu
+#    ini karena jenisnya warisJual.
+#################################################################
+
+:kasus_uji_rantai rdf:type owl:NamedIndividual ,
+                         :KasusTriage ;
+                :adaSKWaris "true"^^xsd:boolean ;
+                :butuhAkta :akta_PHB ;
+                :punyaJenis :trans_warisJual ;
+                rdfs:comment "Tidak ada dasarKasus di sini. Pellet harus menurunkannya lewat rantai properti menjadi aturan_ppat, sekaligus mengetikkan individu ini sebagai KasusWarisJual lewat nominal owl:hasValue."@id ;
+                rdfs:label "Kasus uji: rantai dasar kasus dan nominal"@id .

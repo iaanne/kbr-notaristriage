@@ -1,0 +1,814 @@
+@prefix : <http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage/data> rdf:type owl:Ontology ;
+    owl:imports <http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage> ;
+    rdfs:comment "A-Box triase Notaris/PPAT: seluruh individu (kasus, akta, lembaga, dokumen, objek, status, jenis keperluan, aturan) beserta fakta dan anotasinya. Skema tetap di ontology/notaris-triage.ttl, jadi berkas ini hanya data. Dimuat bersama skema oleh Pellet di Protege. Sebagian triple pada tiap kasus (ditanganiOleh, butuhAkta, berstatus, dikenaiBiaya, butuhDokumen) sama persis dengan kepala aturan R1 sampai R8: di sini mereka diassert sebagai pengetahuan, sedangkan Pellet dapat menurunkannya kembali dari fakta masukan kasus. Anotasi :kataKunci dan :prioritas dipakai demo untuk mencocokkan cerita awam ke kasus, sehingga daftar kata tidak ditulis di kode Python."@id ;
+    rdfs:label "Notaris Triage A-Box"@id .
+
+
+#################################################################
+#    Akta dan surat
+#################################################################
+
+:akta_AJB rdf:type owl:NamedIndividual ,
+                   :AktaJualBeli ;
+          :berdasarPada :aturan_ppat ,
+                        :aturan_tanah ;
+          :perluDaftarDi :lem_bpn ;
+          :penjelasanAwam "Akta jual beli tanah di depan PPAT, lalu balik nama di BPN." ;
+          rdfs:label "AJB"@id .
+
+
+:akta_APHT rdf:type owl:NamedIndividual ,
+                    :AktaHakTanggungan ;
+           :berdasarPada :aturan_uuht ;
+           :perluDaftarDi :lem_bpn ;
+           :penjelasanAwam "Akta pokok jaminan tanah untuk kredit bank: dibuat di PPAT lalu didaftar ke BPN. Didahului SKMHT bila pemilik tidak hadir." ;
+           rdfs:label "APHT"@id .
+
+
+:akta_CV rdf:type owl:NamedIndividual ,
+                  :AktaCV ;
+         :perluDaftarDi :lem_ahu ;
+         :penjelasanAwam "Persekutuan komanditer untuk usaha kecil menengah." ;
+         rdfs:label "CV"@id .
+
+
+:akta_PHB rdf:type owl:NamedIndividual ,
+                   :AktaBagiWaris ;
+          :berdasarPada :aturan_ppat ;
+          :perluDaftarDi :lem_bpn ;
+          :penjelasanAwam "Akta pembagian hak bersama untuk waris yang sudah sepakat." ;
+          rdfs:label "APHB"@id .
+
+
+:akta_PTbiasa rdf:type owl:NamedIndividual ,
+                       :AktaPTBiasa ;
+              :berdasarPada :aturan_pt ;
+              :perluDaftarDi :lem_ahu ;
+              :penjelasanAwam "Perseroan 2+ pendiri dengan akta notaris." ;
+              rdfs:label "PT biasa"@id .
+
+
+:akta_PTperorangan rdf:type owl:NamedIndividual ,
+                            :AktaPTPerorangan ;
+                   :berdasarPada :aturan_pt ;
+                   :perluDaftarDi :lem_ahu ;
+                   :penjelasanAwam "Badan usaha 1 orang, daftar online ke AHU, cocok untuk mikro." ;
+                   rdfs:label "PT perorangan"@id .
+
+
+:akta_SKMHT rdf:type owl:NamedIndividual ,
+                     :SuratKuasaMembebankan ;
+            :berdasarPada :aturan_uuht ;
+            :penjelasanAwam "Kuasa otentik agar bank/notaris bisa memasang APHT. Bukan jaminan itu sendiri dan tidak didaftar ke BPN; wajib disusul APHT." ;
+            rdfs:label "SKMHT"@id .
+
+
+:akta_fidusia rdf:type owl:NamedIndividual ,
+                       :AktaFidusia ;
+              :berdasarPada :aturan_fidusia ;
+              :perluDaftarDi :lem_ahu ;
+              :penjelasanAwam "Jaminan tanpa serah barang: motor tetap dipakai tapi terikat utang." ;
+              rdfs:label "Akta fidusia"@id .
+
+
+:akta_hibah rdf:type owl:NamedIndividual ,
+                     :AktaHibahTanah ;
+            :berdasarPada :aturan_ppat ;
+            :perluDaftarDi :lem_bpn ;
+            :penjelasanAwam "Akta pemberian tanah cuma-cuma, dibuat di PPAT." ;
+            rdfs:label "Akta hibah"@id .
+
+
+:akta_kawin rdf:type owl:NamedIndividual ,
+                     :AktaPerjanjianKawin ;
+            :berdasarPada :aturan_kawin ;
+            :perluDaftarDi :lem_dukcapil ;
+            :penjelasanAwam "Atur pisah harta, dibuat di notaris lalu dicatat di Dukcapil." ;
+            rdfs:label "Perjanjian kawin"@id .
+
+
+:akta_wasiat rdf:type owl:NamedIndividual ,
+                      :AktaWasiat ;
+             :berdasarPada :aturan_uujn ;
+             :perluDaftarDi :lem_ahu ;
+             :penjelasanAwam "Wasiat resmi di notaris dan didaftar ke Kemenkumham." ;
+             rdfs:label "Akta wasiat"@id .
+
+
+#################################################################
+#    Aturan hukum (sumber)
+#################################################################
+
+:aturan_fidusia rdf:type owl:NamedIndividual ,
+                         :UndangUndang ;
+                :penjelasanAwam "Dasar hukum jaminan utang tanpa serah barang, misalnya motor atau tanah." ;
+                :sumber "UU No. 42 Tahun 1999 tentang Jaminan Fidusia dan PP No. 21 Tahun 2015 tentang Tata Cara Pendaftaran Jaminan Fidusia"@id ;
+                rdfs:label "UU Fidusia 42/1999"@id .
+
+
+:aturan_kawin rdf:type owl:NamedIndividual ,
+                       :UndangUndang ;
+              :penjelasanAwam "Aturan perkawinan, termasuk nyatanya hak milik bersama sejak pasangan nikah." ;
+              :sumber "UU No. 1 Tahun 1974 tentang Perkawinan dan Putusan MK No. 69/PUU-XIII/2015"@id ;
+              rdfs:label "UU Perkawinan + MK 69/2015"@id .
+
+
+:aturan_ppat rdf:type owl:NamedIndividual ,
+                      :PeraturanPemerintah ;
+             :terkaitAturan :aturan_tanah ;
+             :penjelasanAwam "Aturan khusus akta tanah." ;
+             :sumber "PP No. 24 Tahun 2016 tentang Perubahan atas PP No. 37 Tahun 1998 tentang Peraturan Jabatan Pejabat Pembuat Akta Tanah"@id ;
+             rdfs:label "Aturan PPAT (PP 24/2016)"@id .
+
+
+:aturan_pt rdf:type owl:NamedIndividual ,
+                    :UndangUndang ;
+           :penjelasanAwam "Dasar pendirian perusahaan, termasuk PT perorangan dengan satu pemilik." ;
+           :sumber "UU No. 40 Tahun 2007 tentang Perseroan Terbatas sebagaimana diubah UU No. 11 Tahun 2020 tentang Cipta Kerja"@id ;
+           rdfs:label "UU PT + Cipta Kerja PT perorangan"@id .
+
+
+:aturan_tanah rdf:type owl:NamedIndividual ,
+                       :AturanHukum ;
+              :penjelasanAwam "Dasar hak atas tanah dan pendaftaran SHM, HGB, atau hak pakai." ;
+              :sumber "UU No. 5 Tahun 1960 tentang Peraturan Dasar Pokok-Pokok Agraria dan PP No. 18 Tahun 2021 tentang Hak Pengelolaan, Hak atas Tanah, Satuan Rumah Susun, dan Pendaftaran Tanah"@id ;
+              rdfs:label "Aturan tanah (UUPA + PP 18/2021)"@id .
+
+
+:aturan_uuht rdf:type owl:NamedIndividual ,
+                      :UndangUndang ;
+             :penjelasanAwam "UUHT No.4/1996: APHT dibuat di PPAT dan didaftar ke BPN; SKMHT hanya kuasa pendahulu yang wajib disusul APHT." ;
+             :sumber "UU No. 4 Tahun 1996 tentang Hak Tanggungan atas Tanah beserta Benda-Benda yang Berkaitan dengan Tanah"@id ;
+             rdfs:label "UUHT No.4/1996"@id .
+
+
+:aturan_uujn rdf:type owl:NamedIndividual ,
+                      :UndangUndang ;
+             :terkaitAturan :aturan_ppat ;
+             :penjelasanAwam "Aturan wewenang notaris dan akta otentik." ;
+             :sumber "UU No. 2 Tahun 2014 tentang Perubahan atas UU No. 30 Tahun 2004 tentang Jabatan Notaris"@id ;
+             rdfs:label "UUJN No.2/2014"@id .
+
+
+:aturan_warisIslam rdf:type owl:NamedIndividual ,
+                            :AturanHukum ;
+                   :penjelasanAwam "Pembagian warisan bagi umat Islam, memakai hukum furu'ah." ;
+                   :sumber "Instruksi Presiden No. 1 Tahun 1991 tentang Kompilasi Hukum Islam"@id ;
+                   rdfs:label "KHI waris Islam"@id .
+
+
+:aturan_warisPerdata rdf:type owl:NamedIndividual ,
+                              :AturanHukum ;
+                     :penjelasanAwam "Pembagian warisan bagi yang berlaku hukum perdata, bukan hukum Islam." ;
+                     :sumber "Kitab Undang-Undang Hukum Perdata (Burgerlijk Wetboek)"@id ;
+                     rdfs:label "KUHPerdata waris"@id .
+
+
+#################################################################
+#    Komponen biaya
+#################################################################
+
+:biaya_BPHTB rdf:type owl:NamedIndividual ,
+                      :KomponenBiaya ;
+             :penjelasanAwam "Pajak pembeli/hibah, urus di Bapenda." ;
+             rdfs:label "BPHTB"@id .
+
+
+:biaya_PNBP_AHU rdf:type owl:NamedIndividual ,
+                         :KomponenBiaya ;
+                :penjelasanAwam "Pungutan resmi negara saat pendaftaran perusahaan di AHU." ;
+                rdfs:label "PNBP AHU"@id .
+
+
+:biaya_PNBP_BPN rdf:type owl:NamedIndividual ,
+                         :KomponenBiaya ;
+                :penjelasanAwam "Pungutan resmi BPN saat proses balik nama tanah." ;
+                rdfs:label "PNBP BPN balik nama"@id .
+
+
+:biaya_PPh rdf:type owl:NamedIndividual ,
+                    :KomponenBiaya ;
+           :penjelasanAwam "Pajak penghasilan dari sisi penjual, umumnya 2,5% dari nilai jual." ;
+           rdfs:label "PPh penjual"@id .
+
+
+:biaya_honorNotaris rdf:type owl:NamedIndividual ,
+                             :KomponenBiaya ;
+                    :penjelasanAwam "Honor jasa notaris untuk akta yang dibuatnya." ;
+                    rdfs:label "honorarium notaris"@id .
+
+
+:biaya_honorPPAT rdf:type owl:NamedIndividual ,
+                          :KomponenBiaya ;
+                 :penjelasanAwam "Honor jasa PPAT untuk akta yang dibuat di hadapannya." ;
+                 rdfs:label "honorarium PPAT"@id .
+
+
+#################################################################
+#    Dokumen syarat
+#################################################################
+
+:dok_AktaKematian rdf:type owl:NamedIndividual ,
+                           :DokumenSyarat ;
+                  rdfs:label "Akta kematian"@id .
+
+
+:dok_AktaNikah rdf:type owl:NamedIndividual ,
+                        :DokumenSyarat ;
+               rdfs:label "Akta nikah"@id .
+
+
+:dok_BPKB rdf:type owl:NamedIndividual ,
+                   :DokumenSyarat ;
+          rdfs:label "BPKB / faktur kendaraan"@id .
+
+
+:dok_KK rdf:type owl:NamedIndividual ,
+                 :DokumenSyarat ;
+        rdfs:label "KK"@id .
+
+
+:dok_KTP rdf:type owl:NamedIndividual ,
+                  :DokumenSyarat ;
+         rdfs:label "KTP"@id .
+
+
+:dok_NPWP rdf:type owl:NamedIndividual ,
+                   :DokumenSyarat ;
+          rdfs:label "NPWP"@id .
+
+
+:dok_PBB rdf:type owl:NamedIndividual ,
+                  :DokumenSyarat ;
+         rdfs:label "SPPT PBB + bukti lunas"@id .
+
+
+:dok_PersetujuanPasangan rdf:type owl:NamedIndividual ,
+                                  :DokumenSyarat ;
+                         rdfs:label "Persetujuan pasangan"@id .
+
+
+:dok_SHM rdf:type owl:NamedIndividual ,
+                  :DokumenSyarat ;
+         rdfs:label "Sertifikat tanah (SHM/HGB)"@id .
+
+
+:dok_SKWaris rdf:type owl:NamedIndividual ,
+                      :DokumenSyarat ;
+             rdfs:label "Surat keterangan waris"@id .
+
+
+:dok_draftAD rdf:type owl:NamedIndividual ,
+                      :DokumenSyarat ;
+             rdfs:label "Konsep nama + anggaran dasar usaha"@id .
+
+
+:dok_modalSetor rdf:type owl:NamedIndividual ,
+                         :DokumenSyarat ;
+                rdfs:label "Bukti modal disetor"@id .
+
+
+:dok_suratKuasa rdf:type owl:NamedIndividual ,
+                         :DokumenSyarat ;
+                rdfs:label "Surat kuasa (bila dikuasakan)"@id .
+
+
+:dok_utangPiutang rdf:type owl:NamedIndividual ,
+                           :DokumenSyarat ;
+                  rdfs:label "Perjanjian utang pokok"@id .
+
+
+#################################################################
+#    Lembaga berwenang
+#################################################################
+
+:lem_ahu rdf:type owl:NamedIndividual ,
+                  :Lembaga ;
+         :penjelasanAwam "Sistem online untuk pengesahan PT, CV, fidusia, wasiat." ;
+         rdfs:label "AHU Kemenkumham"@id .
+
+
+:lem_bpn rdf:type owl:NamedIndividual ,
+                  :Lembaga ;
+         :penjelasanAwam "Kantor pertanahan untuk balik nama sertifikat." ;
+         rdfs:label "BPN / ATR"@id .
+
+
+:lem_dukcapil rdf:type owl:NamedIndividual ,
+                       :Lembaga ;
+              :penjelasanAwam "Catatan sipil untuk KK, akta nikah, kematian, perjanjian kawin." ;
+              rdfs:label "Dukcapil"@id .
+
+
+:lem_notaris rdf:type owl:NamedIndividual ,
+                      :Lembaga ;
+             :penjelasanAwam "Pejabat yang bikin akta otentik umum: PT, fidusia, wasiat, perjanjian kawin." ;
+             rdfs:label "kantor notaris"@id .
+
+
+:lem_pajak rdf:type owl:NamedIndividual ,
+                    :Lembaga ;
+           :penjelasanAwam "Urus PPh, BPHTB, dan validasi pajak jual beli/hibah." ;
+           rdfs:label "kantor pajak / Bapenda"@id .
+
+
+:lem_pengadilan rdf:type owl:NamedIndividual ,
+                         :Lembaga ;
+                :penjelasanAwam "Dipakai kalau ada sengketa atau penetapan waris yang diperebutkan." ;
+                rdfs:label "pengadilan negeri / agama"@id .
+
+
+:lem_ppat rdf:type owl:NamedIndividual ,
+                   :Lembaga ;
+          :penjelasanAwam "Pejabat khusus tanah: AJB, hibah tanah, APHB, tanggungan." ;
+          rdfs:label "kantor PPAT"@id .
+
+
+#################################################################
+#    Objek hukum
+#################################################################
+
+:obj_bangunan rdf:type owl:NamedIndividual ,
+                       :ObjekHukum ;
+              :penjelasanAwam "Rumah, ruko, atau bangunan di atas sebidang tanah." ;
+              rdfs:label "bangunan"@id .
+
+
+:obj_hartaKawin rdf:type owl:NamedIndividual ,
+                         :ObjekHukum ;
+                :penjelasanAwam "Harta yang terbentuk selama perkawinan, termasuk yang baru dipakai bersama." ;
+                rdfs:label "harta kawin"@id .
+
+
+:obj_kendaraan rdf:type owl:NamedIndividual ,
+                        :ObjekHukum ;
+               :penjelasanAwam "Motor, mobil, atau kendaraan lain yang mempunyai BPKB." ;
+               rdfs:label "kendaraan bermotor"@id .
+
+
+:obj_mesinUsaha rdf:type owl:NamedIndividual ,
+                         :ObjekHukum ;
+                :penjelasanAwam "Peralatan dan stok yang dipakai untuk menjalankan usaha." ;
+                rdfs:label "mesin dan stok usaha"@id .
+
+
+:obj_sahamUsaha rdf:type owl:NamedIndividual ,
+                         :ObjekHukum ;
+                :penjelasanAwam "Kepemilikan saham atau bagian di dalam sebuah perusahaan." ;
+                rdfs:label "saham usaha"@id .
+
+
+:obj_tanahHGB rdf:type owl:NamedIndividual ,
+                       :ObjekHukum ;
+              :penjelasanAwam "Tanah Hak Guna Bangunan, biasa untuk ruko atau perusahaan." ;
+              rdfs:label "tanah HGB"@id .
+
+
+:obj_tanahSHM rdf:type owl:NamedIndividual ,
+                       :ObjekHukum ;
+              :penjelasanAwam "Tanah yang sudah bersertifikat Hak Milik." ;
+              rdfs:label "tanah SHM"@id .
+
+
+:obj_tanahWaris rdf:type owl:NamedIndividual ,
+                         :ObjekHukum ;
+                :penjelasanAwam "Tanah peninggalan yang belum dibagi." ;
+                rdfs:label "tanah warisan"@id .
+
+
+#################################################################
+#    Status penanganan
+#################################################################
+
+:status_belumLengkap rdf:type owl:NamedIndividual ,
+                              :StatusPenanganan ;
+                     :penjelasanAwam "Masih ada dokumen atau syarat kurang, belum bisa ke pejabat." ;
+                     rdfs:label "belum lengkap"@id .
+
+
+:status_perluCekDok rdf:type owl:NamedIndividual ,
+                             :StatusPenanganan ;
+                    :penjelasanAwam "Berkas belum lengkap; ada dokumen yang kurang atau belum berlaku." ;
+                    rdfs:label "perlu cek dokumen"@id .
+
+
+:status_rujukPengadilan rdf:type owl:NamedIndividual ,
+                                 :StatusPenanganan ;
+                        :penjelasanAwam "Para pihak tidak sepakat; perlu mediasi dulu sebelum ke pengadilan." ;
+                        rdfs:label "rujuk pengadilan/mediasi"@id .
+
+
+:status_siapNotaris rdf:type owl:NamedIndividual ,
+                             :StatusPenanganan ;
+                    :penjelasanAwam "Berkas sudah cukup; silakan datang bawa dokumennya ke notaris." ;
+                    rdfs:label "siap ke notaris"@id .
+
+
+:status_siapPPAT rdf:type owl:NamedIndividual ,
+                          :StatusPenanganan ;
+                 :penjelasanAwam "Berkas sudah cukup; silakan datang ke kantor PPAT untuk akta." ;
+                 rdfs:label "siap ke PPAT"@id .
+
+
+:status_tuntasAwal rdf:type owl:NamedIndividual ,
+                            :StatusPenanganan ;
+                   :penjelasanAwam "Tuntas di tahap awal: instansi dan akta sudah jelas, tinggal eksekusi berkas." ;
+                   rdfs:label "tuntas tahap awal"@id .
+
+
+#################################################################
+#    Surat
+#################################################################
+
+:surat_SKW rdf:type owl:NamedIndividual ,
+                    :SuratWaris ;
+           :penjelasanAwam "Surat siapa saja ahli warisnya, dibuat di kelurahan/notaris/balai harta." ;
+           rdfs:label "Surat keterangan waris"@id .
+
+
+#################################################################
+#    Jenis keperluan
+#################################################################
+
+:trans_dirikanUsaha rdf:type owl:NamedIndividual ,
+                             :JenisTransaksi ;
+                    :penjelasanAwam "Mau bikin usaha resmi: PT perorangan, PT biasa, atau CV." ;
+                    rdfs:label "dirikan usaha"@id .
+
+
+:trans_hibah rdf:type owl:NamedIndividual ,
+                      :JenisTransaksi ;
+             :penjelasanAwam "Pemberian tanah cuma-cuma ke anak atau kerabat selagi hidup." ;
+             rdfs:label "hibah tanah"@id .
+
+
+:trans_jualBeli rdf:type owl:NamedIndividual ,
+                         :JenisTransaksi ;
+                :penjelasanAwam "Ada penjual dan pembeli tanah, mau pindah nama sertifikat." ;
+                rdfs:label "jual beli tanah"@id .
+
+
+:trans_kawinHarta rdf:type owl:NamedIndividual ,
+                           :JenisTransaksi ;
+                  :penjelasanAwam "Calon suami istri mau atur pisah atau gabung harta." ;
+                  rdfs:label "atur harta kawin"@id .
+
+
+:trans_utangJaminan rdf:type owl:NamedIndividual ,
+                             :JenisTransaksi ;
+                    :penjelasanAwam "Pinjam uang dengan jaminan motor, mesin, atau stok dagangan." ;
+                    rdfs:label "utang dengan jaminan"@id .
+
+
+:trans_warisBagi rdf:type owl:NamedIndividual ,
+                          :JenisTransaksi ;
+                 :penjelasanAwam "Keluarga mau membagi harta peninggalan secara resmi." ;
+                 rdfs:label "bagi waris"@id .
+
+
+:trans_warisJual rdf:type owl:NamedIndividual ,
+                          :JenisTransaksi ;
+                 :penjelasanAwam "Tanah peninggalan keluarga mau dijual, belum tentu sudah balik nama." ;
+                 rdfs:label "jual tanah warisan"@id .
+
+
+:trans_wasiat rdf:type owl:NamedIndividual ,
+                       :JenisTransaksi ;
+              :penjelasanAwam "Pesan terakhir tentang siapa dapat apa setelah meninggal." ;
+              rdfs:label "wasiat"@id .
+
+
+#################################################################
+#    Kasus triase
+#    Setiap kasus membawa anotasi :kataKunci (frasa pemicu pada bahasa
+#    awam) dan :prioritas (pemecah seri bila satu cerita cocok ke
+#    beberapa kasus; angka lebih besar diperiksa lebih dulu). Anotasi
+#    inilah pengganti daftar POLA yang dulu ditulis di demo/app.py.
+#################################################################
+
+:kasus_jualbeli_shm rdf:type owl:NamedIndividual ,
+                             :KasusTriage ;
+                    :berstatus :status_siapPPAT ;
+                    :butuhAkta :akta_AJB ;
+                    :butuhDokumen :dok_NPWP ,
+                                  :dok_PBB ,
+                                  :dok_SHM ;
+                    :dasarKasus :aturan_ppat ,
+                                :aturan_tanah ;
+                    :dikenaiBiaya :biaya_BPHTB ,
+                                  :biaya_PNBP_BPN ,
+                                  :biaya_PPh ,
+                                  :biaya_honorPPAT ;
+                    :ditanganiOleh :lem_ppat ;
+                    :punyaJenis :trans_jualBeli ;
+                    :punyaObjek :obj_tanahSHM ;
+                    :sudahPunyaDokumen :dok_KK ,
+                                       :dok_KTP ;
+                    :adaSepakat "true"^^xsd:boolean ;
+                    :adaSertifikat "true"^^xsd:boolean ;
+                    :cakapHukum "true"^^xsd:boolean ;
+                    :kataKunci "jual" ,
+                               "beli" ,
+                               "jual beli" ,
+                               "ajb" ,
+                               "balik nama" ,
+                               "shm" ,
+                               "sertifikat" ,
+                               "tanah" ;
+                    :perkiraanBiaya "Honor PPAT + BPHTB (±5% NPOP-NPOPTKP) + PPh 2,5% + PNBP BPN." ;
+                    :perkiraanWaktu "AJB 1-7 hari bila berkas lengkap; balik nama BPN 5-14 hari." ;
+                    :prioritas 30 ;
+                    :saranLangkah "Lengkapi SHM + PBB, cek keaslian di BPN, tanda tangan AJB di PPAT, lalu balik nama." ;
+                    rdfs:label "Kasus 1: jual beli SHM biasa"@id .
+
+
+:kasus_waris_belumSKW rdf:type owl:NamedIndividual ,
+                               :KasusTriage ;
+                      :berstatus :status_belumLengkap ;
+                      :butuhAkta :akta_AJB ;
+                      :butuhDokumen :dok_PBB ,
+                                    :dok_SHM ,
+                                    :dok_SKWaris ;
+                      :dasarKasus :aturan_ppat ,
+                                  :aturan_warisPerdata ;
+                      :dikenaiBiaya :biaya_BPHTB ,
+                                    :biaya_honorPPAT ;
+                      :ditanganiOleh :lem_ppat ;
+                      :punyaJenis :trans_warisJual ;
+                      :punyaObjek :obj_tanahWaris ;
+                      :sudahPunyaDokumen :dok_AktaKematian ,
+                                         :dok_KTP ;
+                      :adaSKWaris "false"^^xsd:boolean ;
+                      :adaSepakat "true"^^xsd:boolean ;
+                      :adaSertifikat "true"^^xsd:boolean ;
+                      :cakapHukum "true"^^xsd:boolean ;
+                      :kataKunci "waris" ,
+                                 "warisan" ,
+                                 "ahli waris" ,
+                                 "peninggalan" ,
+                                 "belum balik nama" ,
+                                 "skw" ,
+                                 "surat keterangan waris" ;
+                      :perkiraanBiaya "Biaya SKW kecil; AJB + BPHTB + PPh waris bila ada." ;
+                      :perkiraanWaktu "SKW 7-14 hari; AJB setelahnya 1-7 hari." ;
+                      :prioritas 70 ;
+                      :saranLangkah "Urus SK waris dulu (kelurahan/notaris), baru bisa AJB. Jangan tanda tangan apa pun sebelum SKW jadi." ;
+                      rdfs:label "Kasus 2: jual warisan belum ada SKW"@id .
+
+
+:kasus_waris_sengketa rdf:type owl:NamedIndividual ,
+                               :KasusTriage ;
+                      :berstatus :status_rujukPengadilan ;
+                      :butuhAkta :akta_PHB ;
+                      :butuhDokumen :dok_SKWaris ,
+                                    :dok_AktaKematian ,
+                                    :dok_KTP ,
+                                    :dok_KK ;
+                      :sudahPunyaDokumen :dok_KTP ,
+                                         :dok_KK ;
+                      :ditanganiOleh :lem_pengadilan ;
+                      :punyaJenis :trans_warisBagi ;
+                      :punyaObjek :obj_tanahWaris ;
+                      :adaSKWaris "false"^^xsd:boolean ;
+                      :adaSepakat "false"^^xsd:boolean ;
+                      :adaSertifikat "true"^^xsd:boolean ;
+                      :cakapHukum "true"^^xsd:boolean ;
+                      :kataKunci "ribut" ,
+                                 "tidak setuju" ,
+                                 "tidak sepakat" ,
+                                 "sengketa" ,
+                                 "rebutan" ,
+                                 "beda agama" ,
+                                 "menolak" ,
+                                 "bertengkar" ;
+                      :perkiraanBiaya "Biaya mediasi/panjar perkara sesuai pengadilan." ;
+                      :perkiraanWaktu "Mediasi 2-4 minggu; pengadilan 2-6 bulan." ;
+                      :prioritas 100 ;
+                      :saranLangkah "Tidak bisa akta dulu. Mediasi keluarga atau penetapan pengadilan agama/negeri dulu." ;
+                      rdfs:label "Kasus 3: waris tidak sepakat"@id .
+
+
+:kasus_hibah_tanah rdf:type owl:NamedIndividual ,
+                            :KasusTriage ;
+                   :berstatus :status_siapPPAT ;
+                   :butuhAkta :akta_hibah ;
+                   :butuhDokumen :dok_SHM ,
+                                 :dok_PBB ,
+                                 :dok_NPWP ,
+                                 :dok_KTP ,
+                                 :dok_KK ;
+                   :sudahPunyaDokumen :dok_KTP ,
+                                      :dok_KK ;
+                   :dasarKasus :aturan_ppat ;
+                   :dikenaiBiaya :biaya_BPHTB ,
+                                 :biaya_PNBP_BPN ,
+                                 :biaya_honorPPAT ;
+                   :ditanganiOleh :lem_ppat ;
+                   :punyaJenis :trans_hibah ;
+                   :punyaObjek :obj_tanahSHM ;
+                   :adaSepakat "true"^^xsd:boolean ;
+                   :adaSertifikat "true"^^xsd:boolean ;
+                   :cakapHukum "true"^^xsd:boolean ;
+                   :kataKunci "hibah" ,
+                               "hibah tanah" ,
+                               "kasih ke anak" ,
+                               "pemberian cuma" ,
+                               "hadiah tanah" ;
+                   :perkiraanBiaya "Honor PPAT + BPHTB hibah + PNBP BPN." ;
+                   :perkiraanWaktu "Akta hibah 1-7 hari; balik nama 5-14 hari." ;
+                   :prioritas 30 ;
+                   :saranLangkah "Siapkan SHM + PBB + KK yang menunjukkan hubungan, tanda tangan akta hibah di PPAT." ;
+                   rdfs:label "Kasus 4: hibah tanah ke anak"@id .
+
+
+:kasus_ptperorangan rdf:type owl:NamedIndividual ,
+                             :KasusTriage ;
+                    :berstatus :status_siapNotaris ;
+                    :butuhAkta :akta_PTperorangan ;
+                    :butuhDokumen :dok_KTP ,
+                                  :dok_NPWP ,
+                                  :dok_draftAD ,
+                                  :dok_modalSetor ;
+                    :dasarKasus :aturan_pt ;
+                    :dikenaiBiaya :biaya_PNBP_AHU ;
+                    :ditanganiOleh :lem_ahu ;
+                    :punyaJenis :trans_dirikanUsaha ;
+                    :punyaObjek :obj_sahamUsaha ;
+                    :adaSepakat "true"^^xsd:boolean ;
+                    :cakapHukum "true"^^xsd:boolean ;
+                    :jumlahPendiri 1 ;
+                    :modalKecil "true"^^xsd:boolean ;
+                    :kataKunci "pt perorangan" ,
+                                "perorangan" ,
+                                "perseroan perorangan" ,
+                                "sendiri" ,
+                                "seorang" ,
+                                "usaha mikro" ,
+                                "umkm" ,
+                                "usaha" ,
+                                "dirikan" ,
+                                "badan usaha" ,
+                                "bikin pt" ;
+                    :perkiraanBiaya "PNBP AHU ±50rb + materai; notaris opsional." ;
+                    :perkiraanWaktu "1-3 hari online bila nama lolos." ;
+                    :prioritas 50 ;
+                    :saranLangkah "Cek nama di AHU Online, isi pernyataan pendirian, daftar. Notaris opsional tapi disarankan." ;
+                    rdfs:label "Kasus 5: dirikan PT perorangan"@id .
+
+
+:kasus_cv rdf:type owl:NamedIndividual ,
+                   :KasusTriage ;
+          :berstatus :status_siapNotaris ;
+          :butuhAkta :akta_CV ;
+          :butuhDokumen :dok_KTP ,
+                        :dok_KK ,
+                        :dok_NPWP ,
+                        :dok_draftAD ,
+                        :dok_modalSetor ;
+          :dasarKasus :aturan_pt ;
+          :dikenaiBiaya :biaya_PNBP_AHU ,
+                        :biaya_honorNotaris ;
+          :ditanganiOleh :lem_notaris ;
+          :punyaJenis :trans_dirikanUsaha ;
+          :punyaObjek :obj_sahamUsaha ;
+          :adaSepakat "true"^^xsd:boolean ;
+          :cakapHukum "true"^^xsd:boolean ;
+          :jumlahPendiri 2 ;
+          :modalKecil "true"^^xsd:boolean ;
+          :kataKunci "cv" ,
+                      "persekutuan komanditer" ,
+                      "komanditer" ,
+                      "berdua" ,
+                      "dua orang" ,
+                      "sekutu" ,
+                      "kongsi" ;
+          :perkiraanBiaya "Honor notaris + PNBP AHU." ;
+          :perkiraanWaktu "Akta 3-7 hari; pendaftaran AHU 3-5 hari." ;
+          :prioritas 60 ;
+          :saranLangkah "Siapkan KTP pendiri + konsep usaha, buat akta CV di notaris, daftar ke AHU." ;
+          rdfs:label "Kasus 6: dirikan CV berdua"@id .
+
+
+:kasus_fidusia_motor rdf:type owl:NamedIndividual ,
+                              :KasusTriage ;
+                     :berstatus :status_siapNotaris ;
+                     :butuhAkta :akta_fidusia ;
+                     :butuhDokumen :dok_BPKB ,
+                                   :dok_KTP ,
+                                   :dok_utangPiutang ;
+                     :sudahPunyaDokumen :dok_BPKB ,
+                                        :dok_KTP ;
+                     :dasarKasus :aturan_fidusia ;
+                     :dikenaiBiaya :biaya_PNBP_AHU ,
+                                   :biaya_honorNotaris ;
+                     :ditanganiOleh :lem_notaris ;
+                     :punyaJenis :trans_utangJaminan ;
+                     :punyaObjek :obj_kendaraan ;
+                     :adaSepakat "true"^^xsd:boolean ;
+                     :cakapHukum "true"^^xsd:boolean ;
+                     :kataKunci "utang" ,
+                                 "pinjam" ,
+                                 "jaminan" ,
+                                 "fidusia" ,
+                                 "bpkb" ,
+                                 "jaminan motor" ,
+                                 "kredit" ,
+                                 "motor" ;
+                     :perkiraanBiaya "Honor notaris + PNBP fidusia." ;
+                     :perkiraanWaktu "Akta 1-3 hari; daftar online 1 hari." ;
+                     :prioritas 30 ;
+                     :saranLangkah "Bawa BPKB + perjanjian utang, buat akta fidusia di notaris, daftarkan online." ;
+                     rdfs:label "Kasus 7: utang jaminan motor"@id .
+
+
+:kasus_wasiat rdf:type owl:NamedIndividual ,
+                       :KasusTriage ;
+              :berstatus :status_siapNotaris ;
+              :butuhAkta :akta_wasiat ;
+              :butuhDokumen :dok_KTP ,
+                            :dok_KK ;
+              :sudahPunyaDokumen :dok_KTP ;
+              :dasarKasus :aturan_uujn ;
+              :dikenaiBiaya :biaya_PNBP_AHU ,
+                            :biaya_honorNotaris ;
+              :ditanganiOleh :lem_notaris ;
+              :punyaJenis :trans_wasiat ;
+              :punyaObjek :obj_tanahWaris ;
+              :adaSepakat "true"^^xsd:boolean ;
+              :cakapHukum "true"^^xsd:boolean ;
+              :kataKunci "wasiat" ,
+                          "pesan terakhir" ,
+                          "meninggal nanti" ,
+                          "tidak rebutan" ,
+                          "warisan nanti" ;
+              :perkiraanBiaya "Honor notaris + PNBP daftar wasiat." ;
+              :perkiraanWaktu "1 hari bila syarat lengkap." ;
+              :prioritas 30 ;
+              :saranLangkah "Datang sehat jasmani + 2 saksi, buat wasiat di notaris, pastikan didaftar ke daftar wasiat." ;
+              rdfs:label "Kasus 8: buat wasiat"@id .
+
+
+:kasus_kawin rdf:type owl:NamedIndividual ,
+                      :KasusTriage ;
+             :berstatus :status_siapNotaris ;
+             :butuhAkta :akta_kawin ;
+             :butuhDokumen :dok_KTP ,
+                           :dok_KK ,
+                           :dok_AktaNikah ;
+             :sudahPunyaDokumen :dok_KTP ,
+                                :dok_KK ;
+             :dasarKasus :aturan_kawin ;
+             :dikenaiBiaya :biaya_honorNotaris ;
+             :ditanganiOleh :lem_notaris ;
+             :punyaJenis :trans_kawinHarta ;
+             :punyaObjek :obj_hartaKawin ;
+             :adaSepakat "true"^^xsd:boolean ;
+             :cakapHukum "true"^^xsd:boolean ;
+             :kataKunci "kawin" ,
+                         "nikah" ,
+                         "pisah harta" ,
+                         "harta bersama" ,
+                         "perjanjian kawin" ,
+                         "pra-nikah" ,
+                         "perjanjian perkawinan" ;
+             :perkiraanBiaya "Honor notaris + biaya pencatatan." ;
+             :perkiraanWaktu "Akta 1-3 hari; pencatatan 3-7 hari." ;
+             :prioritas 30 ;
+             :saranLangkah "Buat sebelum/sesudah nikah di notaris, lalu catatkan ke Dukcapil dan KUA/Dukcapil." ;
+             rdfs:label "Kasus 9: perjanjian pisah harta"@id .
+
+
+:kasus_ptbiasa rdf:type owl:NamedIndividual ,
+                        :KasusTriage ;
+               :berstatus :status_siapNotaris ;
+               :butuhAkta :akta_PTbiasa ;
+               :butuhDokumen :dok_KTP ,
+                             :dok_KK ,
+                             :dok_NPWP ,
+                             :dok_draftAD ,
+                             :dok_modalSetor ;
+               :dasarKasus :aturan_pt ;
+               :dikenaiBiaya :biaya_PNBP_AHU ,
+                             :biaya_honorNotaris ;
+               :ditanganiOleh :lem_notaris ;
+               :punyaJenis :trans_dirikanUsaha ;
+               :punyaObjek :obj_sahamUsaha ;
+               :adaSepakat "true"^^xsd:boolean ;
+               :cakapHukum "true"^^xsd:boolean ;
+               :jumlahPendiri 3 ;
+               :modalKecil "false"^^xsd:boolean ;
+               :kataKunci "pt" ,
+                          "perseroan terbatas" ,
+                          "pt biasa" ,
+                          "badan usaha besar" ;
+               :perkiraanBiaya "Honor notaris + PNBP AHU." ;
+               :perkiraanWaktu "Akta 3-7 hari; pendaftaran AHU 3-5 hari." ;
+               :prioritas 40 ;
+               :saranLangkah "Siapkan KTP semua pendiri + konsep usaha, buat akta pendirian PT di notaris, lalu daftar ke AHU." ;
+               rdfs:label "Kasus 10: dirikan PT biasa"@id .

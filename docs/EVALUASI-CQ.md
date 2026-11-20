@@ -1,5 +1,9 @@
-# Evaluasi 10 CQ — hasil aktual (rdflib, 2026-10-05)
-Ontology: ontology/notaris-triage.ttl (1007 triple, 8 SWRL). Semua query mengembalikan baris.
+# Evaluasi 10 CQ — hasil aktual (rdflib)
+
+Ontology: `ontology/notaris-triage.ttl` (T-Box, 681 triple) + `data/abox.ttl`
+(A-Box, 541 triple) = 1222 triple, 8 aturan SWRL, 79 individu aplikasi, dan
+ekspresivitas SROIQ(D). Berkas uji Pellet `data/uji-penalaran.ttl` (18 triple,
+2 individu) berdiri terpisah dan tidak dipakai query CQ.
 
 | CQ | File | Hasil |
 |---|---|---|
@@ -15,5 +19,24 @@ Ontology: ontology/notaris-triage.ttl (1007 triple, 8 SWRL). Semua query mengemb
 | CQ10 biaya waktu | cq10-biaya-waktu.rq | 9 baris saran + waktu + biaya |
 
 Cara ulang: `python3 demo/app.py --test`
-Buka di Protege: File → Open → notaris-triage.ttl; jalankan HermiT via Reasoner;
-uji SPARQL via tab SPARQL; aturan via tab SWRL (rule_R1..R8).
+(uji ini menjalankan 9 skenario deteksi dan 10 berkas CQ sekaligus).
+
+Di Protégé: buka `data/abox.ttl` (ia mengimpor T-Box, yang mengimpor LKIF),
+lalu jalankan Pellet lewat Reasoner. Uji SPARQL di tab SPARQL, aturan di tab
+SWRL (delapan aturan berlabel R1 sampai R8).
+
+Uji penalaran Pellet: buka `data/uji-penalaran.ttl` (mengimpor A-Box), jalankan
+Pellet, lalu periksa individu `:kasus_uji_waris`. Berkas itu hanya membawa fakta
+masukan (`punyaJenis :trans_warisJual`, `adaSKWaris false`), tanpa kepala aturan.
+Setelah reasoning, dua fakta berikut harus muncul sebagai hasil inferensi R2:
+
+- `berstatus :status_belumLengkap`
+- `butuhDokumen :dok_SKWaris`
+
+Kalau keduanya muncul padahal tidak pernah ditulis di berkas, terbukti Pellet
+benar-benar menjalankan R2, bukan sekadar membaca assertion.
+
+Catatan: query dijalankan oleh rdflib atas fakta yang sudah diassert di A-Box,
+jadi demo tidak butuh reasoner. Peran Pellet adalah memeriksa konsistensi,
+menurunkan fakta tersembunyi (properti inverse dan transitive, tipikal kelas),
+dan menjalankan R1–R8 dari fakta masukan kasus.

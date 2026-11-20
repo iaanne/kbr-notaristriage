@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <!--
+      Katalog untuk berkas di folder data/.
+
+      Protégé mencari catalog-v001.xml di folder berkas yang dibuka. Karena
+      data/abox.ttl dan data/uji-penalaran.ttl dibuka dari folder ini, katalog
+      harus ada di sini, bukan di akar repo.
+
+      Path `uri` relatif terhadap berkas katalog ini:
+        abox.ttl                      -> A-Box
+        ../ontology/...               -> T-Box
+        ../ontology/external/lkif/... -> modul LKIF-Core
+    -->
+    <uri id="notaris-abox" name="http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage/data" uri="abox.ttl"/>
+    <uri id="notaris-triage" name="http://www.semanticweb.org/iaanne/ontologies/2026/notaris-triage" uri="../ontology/notaris-triage.ttl"/>
+
+    <uri id="lkif-core" name="http://www.estrellaproject.org/lkif-core/lkif-core.owl" uri="../ontology/external/lkif/lkif-core.ttl"/>
+    <uri id="lkif-top" name="http://www.estrellaproject.org/lkif-core/lkif-top.owl" uri="../ontology/external/lkif/lkif-top.ttl"/>
+    <uri id="mereology" name="http://www.estrellaproject.org/lkif-core/mereology.owl" uri="../ontology/external/lkif/mereology.ttl"/>
+    <uri id="relative-places" name="http://www.estrellaproject.org/lkif-core/relative-places.owl" uri="../ontology/external/lkif/relative-places.ttl"/>
+    <uri id="process" name="http://www.estrellaproject.org/lkif-core/process.owl" uri="../ontology/external/lkif/process.ttl"/>
+    <uri id="action" name="http://www.estrellaproject.org/lkif-core/action.owl" uri="../ontology/external/lkif/action.ttl"/>
+    <uri id="role" name="http://www.estrellaproject.org/lkif-core/role.owl" uri="../ontology/external/lkif/role.ttl"/>
+    <uri id="expression" name="http://www.estrellaproject.org/lkif-core/expression.owl" uri="../ontology/external/lkif/expression.ttl"/>
+    <uri id="legal-action" name="http://www.estrellaproject.org/lkif-core/legal-action.owl" uri="../ontology/external/lkif/legal-action.ttl"/>
+    <uri id="legal-role" name="http://www.estrellaproject.org/lkif-core/legal-role.owl" uri="../ontology/external/lkif/legal-role.ttl"/>
+    <uri id="norm" name="http://www.estrellaproject.org/lkif-core/norm.owl" uri="../ontology/external/lkif/norm.ttl"/>
+    <uri id="time" name="http://www.estrellaproject.org/lkif-core/time.owl" uri="../ontology/external/lkif/time.ttl"/>
+</catalog>

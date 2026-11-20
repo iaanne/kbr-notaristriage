@@ -1,0 +1,11 @@
+﻿nomor,berkas,pertanyaan,mengembalikan baris,keterangan
+CQ1,queries/cq01-jualbeli.rq,"Saya mau jual tanah SHM — harus ke mana, akta apa?",ya,
+CQ2,queries/cq02-waris-jual.rq,Tanah warisan belum balik nama mau dijual — urutan dan kurang apa?,ya,
+CQ3,queries/cq03-sengketa.rq,Ahli waris tidak sepakat — jalurnya ke mana?,ya,
+CQ4,queries/cq04-hibah.rq,"Hibah tanah ke anak — akta, biaya, daftar di mana?",ya,
+CQ5,queries/cq05-usaha.rq,"Mau usaha kecil — pilih PT perorangan, PT biasa, atau CV?",ya,
+CQ6,queries/cq06-fidusia.rq,Utang dengan jaminan motor — perlu fidusia?,ya,
+CQ7,queries/cq07-wasiat.rq,Mau buat wasiat — syarat dan akta apa?,ya,
+CQ8,queries/cq08-kawin.rq,Perjanjian pisah harta — bisa di notaris?,ya,
+CQ9,queries/cq09-kelengkapan.rq,Dokumen saya kurang apa? Status siap atau belum?,ya,
+CQ10,queries/cq10-biaya-waktu.rq,"Estimasi langkah, waktu, biaya untuk kasus saya?",ya,
